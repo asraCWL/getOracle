@@ -45,7 +45,7 @@ case "$cmd" in
     echo "[vps-ctl] running foreground smoke test (~150s) — Ctrl+C to abort early"
     cd "$UPSTREAM_DIR"
     perl -e 'alarm 150; exec @ARGV' "$UPSTREAM_DIR/.venv/bin/python" main.py
-    status=$?
+    rc=$?
     cd "$ROOT"
 
     LOG_FILE="$UPSTREAM_DIR/launch_instance.log"
