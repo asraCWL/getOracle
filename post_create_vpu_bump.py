@@ -24,3 +24,21 @@ def extract_instance_ocid(content: str) -> str:
     if not match:
         raise ValueError("No instance OCID found in INSTANCE_CREATED content")
     return match.group(0)
+
+
+def find_boot_volume_id(
+    compute_client,
+    availability_domain: str,
+    compartment_id: str,
+    instance_id: str,
+) -> str:
+    response = compute_client.list_boot_volume_attachments(
+        availability_domain=availability_domain,
+        compartment_id=compartment_id,
+        instance_id=instance_id,
+    )
+    if not response.data:
+        raise RuntimeError(
+            f"No boot volume attachment found for instance {instance_id}"
+        )
+    return response.data[0].boot_volume_id
