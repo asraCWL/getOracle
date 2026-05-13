@@ -7,6 +7,7 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 SCRIPTS=(
   "$ROOT/setup_mac.sh"
   "$ROOT/run_loop.sh"
+  "$ROOT/vps-ctl.sh"
 )
 
 fail=0
