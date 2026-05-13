@@ -66,3 +66,35 @@ def test_find_boot_volume_id_raises_when_no_attachments():
             compartment_id="c",
             instance_id="i",
         )
+
+
+def test_bump_vpu_calls_update_with_120():
+    from oci.core.models import UpdateBootVolumeDetails
+
+    blockstorage_client = MagicMock()
+    blockstorage_client.update_boot_volume.return_value = MagicMock(
+        data=MagicMock(vpus_per_gb=120)
+    )
+
+    final_vpu = p.bump_vpu(
+        blockstorage_client,
+        boot_volume_id="ocid1.bootvolume.oc1.eu-stockholm-1.fakebv",
+    )
+
+    assert final_vpu == 120
+    args, kwargs = blockstorage_client.update_boot_volume.call_args
+    assert kwargs.get("boot_volume_id") == "ocid1.bootvolume.oc1.eu-stockholm-1.fakebv" \
+        or args[0] == "ocid1.bootvolume.oc1.eu-stockholm-1.fakebv"
+    details = kwargs.get("update_boot_volume_details") or args[1]
+    assert isinstance(details, UpdateBootVolumeDetails)
+    assert details.vpus_per_gb == 120
+
+
+def test_main_short_circuits_when_vpu_bumped_exists(tmp_path, monkeypatch):
+    bumped = tmp_path / "VPU_BUMPED"
+    bumped.write_text("already done\n")
+    monkeypatch.setattr(p, "VPU_BUMPED_FILE", bumped)
+    monkeypatch.setattr(p, "INSTANCE_CREATED_FILE", tmp_path / "INSTANCE_CREATED")
+
+    rc = p.main()
+    assert rc == 0
