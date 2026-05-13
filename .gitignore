@@ -1,0 +1,18 @@
+# Cloned upstream — managed by setup_mac.sh, do not commit
+oracle-freetier-instance-creation/
+
+# Local logs
+logs/
+*.log
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# macOS
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
