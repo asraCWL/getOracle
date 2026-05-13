@@ -28,5 +28,26 @@ else
 fi
 log "upstream ready at $UPSTREAM_DIR"
 
+# --- create venv and install deps ---
+VENV="$UPSTREAM_DIR/.venv"
+if [ ! -d "$VENV" ]; then
+  log "creating venv at $VENV"
+  python3 -m venv "$VENV"
+else
+  log "venv already exists at $VENV"
+fi
+
+log "upgrading pip"
+"$VENV/bin/pip" install --quiet --upgrade pip
+
+REQS="$UPSTREAM_DIR/requirements.txt"
+if [ -f "$REQS" ]; then
+  log "installing upstream requirements"
+  "$VENV/bin/pip" install --quiet -r "$REQS"
+else
+  fail "upstream requirements.txt not found at $REQS"
+fi
+log "venv ready with upstream deps"
+
 # --- placeholders for next tasks ---
-log "TODO: create venv, install deps, scaffold templates"
+log "TODO: scaffold templates"
