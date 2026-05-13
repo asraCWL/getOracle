@@ -49,5 +49,44 @@ else
 fi
 log "venv ready with upstream deps"
 
-# --- placeholders for next tasks ---
-log "TODO: scaffold templates"
+# --- scaffold config files from templates (only if missing) ---
+copy_if_missing() {
+  local src="$1" dst="$2"
+  if [ -f "$dst" ]; then
+    log "skip (exists): $dst"
+  else
+    cp "$src" "$dst"
+    log "scaffolded: $dst"
+  fi
+}
+
+copy_if_missing "$ROOT/templates/oci.env.template"     "$UPSTREAM_DIR/oci.env"
+copy_if_missing "$ROOT/templates/oci_config.template"  "$UPSTREAM_DIR/oci_config"
+
+# --- create logs dir ---
+mkdir -p "$ROOT/logs"
+
+# --- final next-steps checklist ---
+cat <<EOF
+
+[setup_mac] Setup complete. Next steps:
+
+  1. Drop your OCI API private key into:
+        $UPSTREAM_DIR/oci_api_private_key.pem
+
+  2. Drop your SSH public key into:
+        $UPSTREAM_DIR/ssh_public_key.pub
+     (e.g. cp ~/.ssh/id_ed25519.pub $UPSTREAM_DIR/ssh_public_key.pub)
+
+  3. Edit and fill placeholders in:
+        $UPSTREAM_DIR/oci_config
+        $UPSTREAM_DIR/oci.env
+     See docs/superpowers/specs/ for the value list.
+
+  4. Smoke-test the loop:
+        ./vps-ctl.sh test
+
+  5. If test passes, install the LaunchAgent:
+        ./vps-ctl.sh start
+
+EOF
