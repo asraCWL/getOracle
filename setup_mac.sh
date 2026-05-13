@@ -18,5 +18,15 @@ fi
 PYVER="$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')"
 log "python3 found: version $PYVER"
 
+# --- clone or update upstream ---
+if [ -d "$UPSTREAM_DIR/.git" ]; then
+  log "upstream already cloned; running git pull"
+  git -C "$UPSTREAM_DIR" pull --ff-only
+else
+  log "cloning upstream from $UPSTREAM_URL"
+  git clone "$UPSTREAM_URL" "$UPSTREAM_DIR"
+fi
+log "upstream ready at $UPSTREAM_DIR"
+
 # --- placeholders for next tasks ---
-log "TODO: clone upstream, create venv, install deps, scaffold templates"
+log "TODO: create venv, install deps, scaffold templates"
