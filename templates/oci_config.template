@@ -1,0 +1,6 @@
+[DEFAULT]
+user=<FILL_IN_USER_OCID>
+tenancy=<FILL_IN_TENANCY_OCID>
+fingerprint=<FILL_IN_FINGERPRINT>
+region=eu-stockholm-1
+key_file=/Users/asamr/OracleVPS/oracle-freetier-instance-creation/oci_api_private_key.pem
