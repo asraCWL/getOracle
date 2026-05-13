@@ -53,7 +53,8 @@ case "$cmd" in
       echo "[vps-ctl] FAIL: no launch_instance.log produced"
       exit 1
     fi
-    attempts=$(grep -c "LaunchInstance" "$LOG_FILE" || true)
+    # Upstream logs each attempt as "Command: launch_instance--"
+    attempts=$(grep -c "Command: launch_instance" "$LOG_FILE" || true)
     echo "[vps-ctl] attempts observed in launch_instance.log: $attempts"
     if [ "$attempts" -ge 2 ]; then
       echo "[vps-ctl] PASS: loop fired at least twice"
