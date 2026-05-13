@@ -6,6 +6,7 @@ set -e
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 SCRIPTS=(
   "$ROOT/setup_mac.sh"
+  "$ROOT/run_loop.sh"
 )
 
 fail=0
