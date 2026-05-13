@@ -21,9 +21,11 @@ require_setup() {
     echo "oci.env or oci_config missing — run ./setup_mac.sh first" >&2
     exit 64
   fi
-  if grep -q "FILL_IN_" "$UPSTREAM_DIR/oci.env" "$UPSTREAM_DIR/oci_config"; then
+  # Match actual placeholder *values* (e.g. =<FILL_IN_FOO>), not the comment
+  # header that describes them ("Edit the <FILL_IN_...> placeholders").
+  if grep -Eq "=<FILL_IN_[A-Z_]+>" "$UPSTREAM_DIR/oci.env" "$UPSTREAM_DIR/oci_config"; then
     echo "FILL_IN_ placeholders still in config — edit oci.env and oci_config first" >&2
-    grep -l "FILL_IN_" "$UPSTREAM_DIR/oci.env" "$UPSTREAM_DIR/oci_config" >&2
+    grep -El "=<FILL_IN_[A-Z_]+>" "$UPSTREAM_DIR/oci.env" "$UPSTREAM_DIR/oci_config" >&2
     exit 65
   fi
   if [ ! -f "$UPSTREAM_DIR/oci_api_private_key.pem" ]; then
