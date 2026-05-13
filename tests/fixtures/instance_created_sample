@@ -1,0 +1,8 @@
+Instance successfully created.
+
+display_name: oracle-arm-vps
+id: ocid1.instance.oc1.eu-stockholm-1.aaaaaaaaexamplefakeocidvalue1234567890abcdef
+shape: VM.Standard.A1.Flex
+availability_domain: xxxx:EU-STOCKHOLM-1-AD-1
+lifecycle_state: RUNNING
+time_created: 2026-05-13T12:00:00Z
