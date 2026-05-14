@@ -324,6 +324,7 @@ dashboard/app.js     ┘
 | --- | --- |
 | `launch_instance.log` missing or empty (cold start) | Generator emits a valid zero-state `stats.json`; page renders "0 attempts" cleanly. |
 | A string destined for `stats.json` matches the OCID/IP/path scrub patterns | That string is dropped from output entirely; generator tests assert this path works. |
+| `generate_stats.py` exits non-zero during a publish | `publish_dashboard.sh` logs the failure and exits 1 without copying assets or committing — no half-built page is published. The hunt is unaffected. Next 15-minute run retries. |
 | `publish_dashboard.sh` cannot reach GitHub (network down) | Logs the failure to `logs/dashboard.log`, exits non-zero. The hunt is unaffected. Next 15-minute run retries. |
 | `gh-pages` worktree missing or corrupted | Publish script detects its absence and recreates it before generating. |
 | Nothing changed since the last publish | `git` finds no diff; the script exits 0 without committing. |
