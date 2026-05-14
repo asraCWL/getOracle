@@ -89,7 +89,8 @@ async function main() {
     const res = await fetch("stats.json", { cache: "no-store" });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const stats = await res.json();
-    if (!stats || !stats.totals || !Array.isArray(stats.timeline)) {
+    if (!stats || !stats.totals || !Array.isArray(stats.timeline) ||
+        !Array.isArray(stats.gaps) || !Array.isArray(stats.log_tail)) {
       throw new Error("stats.json shape mismatch");
     }
     renderStatus(stats);
