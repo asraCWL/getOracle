@@ -208,12 +208,12 @@ Page sections, top to bottom:
    Zero-attempt hours render as a dim Medium Gray `#3a3a3a` ghost bar, so the
    stretches where the Mac was asleep read clearly as offline rather than just low
    activity.
-5. **Offline gaps** — `OFFLINE GAPS` heading over a monospace list, one line per
+5. **Log tail** — `RECENT ACTIVITY` heading over a monospace list of the ~20
+   `log_tail` lines in Light Steel, status codes in Stone Accent `#606060`.
+6. **Offline gaps** — `OFFLINE GAPS` heading over a monospace list, one line per
    entry in `gaps`: `<from> → <to>  (<human duration>)` in Light Steel. The Mac is
    not always on, so this section makes each sleep/downtime hole explicit. Shows
    `none` when the list is empty.
-6. **Log tail** — `RECENT ACTIVITY` heading over a monospace list of the ~20
-   `log_tail` lines in Light Steel, status codes in Stone Accent `#606060`.
 7. **Footer** — a `#111111` band: caption `updated <generated_at> · auto 15m` in
    Inter, Stone Accent.
 
