@@ -88,12 +88,15 @@ if command -v gh >/dev/null 2>&1; then
     if [ "$VIS" = "PUBLIC" ]; then
       log "repo $GH_REPO already public"
     else
+      # Unguarded on purpose: if this fails, set -e aborts setup — correct,
+      # since Pages on the free plan cannot proceed without a public repo.
       gh repo edit "$GH_REPO" --visibility public --accept-visibility-change-consequences
       log "set $GH_REPO visibility to public (required for GitHub Pages on the free plan)"
     fi
 
-    git -C "$ROOT" push -u origin main
-    log "pushed main to origin"
+    if git -C "$ROOT" push -u origin main; then
+      log "main pushed to origin (or already up-to-date)"
+    fi
 
     # First publish: creates the gh-pages branch + worktree and pushes the page.
     "$ROOT/publish_dashboard.sh" || log "initial publish reported an issue (continuing)"
