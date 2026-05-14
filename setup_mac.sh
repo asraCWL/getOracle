@@ -66,6 +66,54 @@ copy_if_missing "$ROOT/templates/oci_config.template"  "$UPSTREAM_DIR/oci_config
 # --- create logs dir ---
 mkdir -p "$ROOT/logs"
 
+# --- one-time GitHub publish setup (idempotent) ---
+GH_REMOTE_URL="https://github.com/asraCWL/getOracle.git"
+GH_REPO="asraCWL/getOracle"
+
+if command -v gh >/dev/null 2>&1; then
+  if git -C "$ROOT" remote get-url origin >/dev/null 2>&1; then
+    log "git remote 'origin' already set"
+  else
+    git -C "$ROOT" remote add origin "$GH_REMOTE_URL"
+    log "added git remote 'origin' -> $GH_REMOTE_URL"
+  fi
+
+  # Ensure git uses gh's stored credentials for HTTPS operations
+  gh auth setup-git 2>/dev/null || true
+
+  VIS="$(gh repo view "$GH_REPO" --json visibility -q .visibility 2>/dev/null || echo unknown)"
+  if [ "$VIS" = "unknown" ]; then
+    log "WARNING: cannot read $GH_REPO visibility (is gh authenticated?) — skipping publish setup"
+  else
+    if [ "$VIS" = "PUBLIC" ]; then
+      log "repo $GH_REPO already public"
+    else
+      gh repo edit "$GH_REPO" --visibility public --accept-visibility-change-consequences
+      log "set $GH_REPO visibility to public (required for GitHub Pages on the free plan)"
+    fi
+
+    git -C "$ROOT" push -u origin main
+    log "pushed main to origin"
+
+    # First publish: creates the gh-pages branch + worktree and pushes the page.
+    "$ROOT/publish_dashboard.sh" || log "initial publish reported an issue (continuing)"
+
+    if gh api "repos/$GH_REPO/pages" >/dev/null 2>&1; then
+      log "GitHub Pages already enabled for $GH_REPO"
+    else
+      if echo '{"source":{"branch":"gh-pages","path":"/"}}' \
+           | gh api --method POST "repos/$GH_REPO/pages" --input - >/dev/null 2>&1; then
+        log "enabled GitHub Pages (gh-pages branch) for $GH_REPO"
+      else
+        log "WARNING: could not enable GitHub Pages automatically — enable it in"
+        log "         repo Settings > Pages: branch 'gh-pages', folder '/ (root)'"
+      fi
+    fi
+  fi
+else
+  log "WARNING: gh CLI not found — skipping GitHub publish setup (install: brew install gh)"
+fi
+
 # --- final next-steps checklist ---
 cat <<EOF
 
