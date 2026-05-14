@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="refresh" content="180">
+  <title>getOracle · capacity watch</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&family=Inter:wght@400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="band">
+    <h1>getOracle · capacity watch</h1>
+    <p class="subtitle">eu-stockholm-1 · VM.Standard.A1.Flex</p>
+  </header>
+
+  <main>
+    <p id="status-line" class="status-line">loading…</p>
+
+    <section class="cards" id="cards"></section>
+
+    <section>
+      <h2>ATTEMPTS / HOUR</h2>
+      <div class="timeline" id="timeline"></div>
+    </section>
+
+    <section>
+      <h2>OFFLINE GAPS</h2>
+      <ul class="loglist" id="gaps"></ul>
+    </section>
+
+    <section>
+      <h2>RECENT ACTIVITY</h2>
+      <ul class="loglist" id="log-tail"></ul>
+    </section>
+  </main>
+
+  <footer class="band">
+    <p id="footer-caption" class="caption">—</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
