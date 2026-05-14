@@ -1,14 +1,14 @@
 {
-  "generated_at": "2026-05-14T12:55:32",
+  "generated_at": "2026-05-14T12:56:52",
   "status": "hunting",
   "instance_created": false,
   "vpu_bumped": false,
   "first_attempt": "2026-05-13T20:59:11",
-  "last_attempt": "2026-05-14T12:54:57",
-  "hunting_duration_seconds": 33416,
+  "last_attempt": "2026-05-14T12:55:58",
+  "hunting_duration_seconds": 33477,
   "totals": {
-    "attempts": 558,
-    "rate_limited_429": 271,
+    "attempts": 559,
+    "rate_limited_429": 272,
     "out_of_capacity_500": 287,
     "other": 0,
     "crashes": 8,
@@ -82,7 +82,7 @@
     },
     {
       "hour": "2026-05-14T12:00",
-      "attempts": 55
+      "attempts": 56
     }
   ],
   "gaps": [
@@ -138,7 +138,6 @@
     }
   ],
   "log_tail": [
-    "2026-05-14 12:35:43  429  Too many requests for the user",
     "2026-05-14 12:36:44  500  Out of host capacity.",
     "2026-05-14 12:37:45  429  Too many requests for the user",
     "2026-05-14 12:38:46  500  Out of host capacity.",
@@ -157,6 +156,7 @@
     "2026-05-14 12:51:55  429  Too many requests for the user",
     "2026-05-14 12:52:56  500  Out of host capacity.",
     "2026-05-14 12:53:56  429  Too many requests for the user",
-    "2026-05-14 12:54:57  500  Out of host capacity."
+    "2026-05-14 12:54:57  500  Out of host capacity.",
+    "2026-05-14 12:55:58  429  Too many requests for the user"
   ]
 }
