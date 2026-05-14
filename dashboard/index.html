@@ -4,51 +4,95 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="refresh" content="180">
-  <title>getOracle</title>
+  <title>getOracle — capacity watch</title>
+  <meta name="description" content="A live watch for Oracle Free Tier ARM capacity (VM.Standard.A1.Flex) in eu-stockholm-1.">
+  <meta name="theme-color" content="#07090c">
+  <meta property="og:title" content="getOracle — capacity watch">
+  <meta property="og:description" content="Listening for Oracle Free Tier ARM capacity in eu-stockholm-1.">
+  <meta property="og:type" content="website">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Ccircle%20cx='16'%20cy='16'%20r='11'%20fill='none'%20stroke='%23f0a23c'%20stroke-width='2.5'/%3E%3Ccircle%20cx='16'%20cy='16'%20r='4'%20fill='%23f0a23c'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
-  <header class="band">
-    <h1>getOracle</h1>
-    <p class="subtitle">eu-stockholm-1 · VM.Standard.A1.Flex</p>
-  </header>
+<body class="state-hunting">
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div class="bg-grain" aria-hidden="true"></div>
 
-  <main>
-    <p id="status-line" class="status-line">loading…</p>
+  <div class="frame">
+    <header class="masthead">
+      <span class="wordmark">getOracle</span>
+      <span class="coords">eu-stockholm-1 · VM.Standard.A1.Flex</span>
+    </header>
 
-    <section class="cards" id="cards"></section>
+    <section class="hero" id="hero">
+      <div class="hero-state">
+        <span class="dot" id="dot" aria-hidden="true"></span>
+        <h1 class="state-word" id="state-word">opening channel…</h1>
+      </div>
+      <p class="hero-sub" id="hero-sub">Connecting to the watch log.</p>
 
-    <section>
-      <h2>ATTEMPTS / HOUR</h2>
+      <div class="hero-metrics">
+        <div class="metric">
+          <div class="metric-value" id="m-attempts">—</div>
+          <div class="metric-label">attempts logged</div>
+        </div>
+        <div class="metric-sep" aria-hidden="true"></div>
+        <div class="metric">
+          <div class="metric-value" id="m-watch">—</div>
+          <div class="metric-label">time on watch</div>
+        </div>
+      </div>
+
+      <p class="hero-readout" id="hero-readout">—</p>
+    </section>
+
+    <section class="panel chart-panel">
+      <div class="panel-head">
+        <h2>Signal log</h2>
+        <span class="panel-note" id="chart-note">—</span>
+      </div>
       <div class="chart">
         <div class="chart-yaxis" id="chart-yaxis"></div>
         <div class="chart-main">
           <div class="chart-plot">
             <div class="chart-grid" id="chart-grid"></div>
+            <div class="chart-gaps" id="chart-gaps"></div>
             <div class="timeline" id="timeline"></div>
+            <div class="now-marker" id="now-marker"><span>now</span></div>
           </div>
           <div class="chart-xaxis" id="chart-xaxis"></div>
         </div>
       </div>
     </section>
 
-    <section>
-      <h2>RECENT ACTIVITY</h2>
+    <div class="panel-row">
+      <section class="panel">
+        <div class="panel-head"><h2>Rejections</h2></div>
+        <ul class="statlist" id="rejections"></ul>
+      </section>
+      <section class="panel">
+        <div class="panel-head"><h2>Interruptions</h2></div>
+        <ul class="statlist" id="interruptions"></ul>
+      </section>
+    </div>
+
+    <section class="panel">
+      <div class="panel-head"><h2>Recent signals</h2></div>
       <ul class="loglist" id="log-tail"></ul>
     </section>
 
-    <section>
-      <h2>OFFLINE GAPS</h2>
-      <ul class="loglist" id="gaps"></ul>
+    <section class="panel">
+      <div class="panel-head"><h2>Offline gaps</h2></div>
+      <ul class="gaplist" id="gaps"></ul>
     </section>
-  </main>
 
-  <footer class="band">
-    <p id="footer-caption" class="caption">—</p>
-  </footer>
+    <footer class="footer">
+      <span class="footer-mark">getOracle</span>
+      <span id="footer-caption">—</span>
+    </footer>
+  </div>
 
   <script src="app.js"></script>
 </body>
