@@ -102,9 +102,18 @@ Parsing:
   by an `Output: {...}` line carrying a `status` code. Count attempts; bucket by
   status (`429` → rate-limited, `500` → out-of-capacity, anything else → other).
 - `first_attempt` / `last_attempt` come from the first and last attempt timestamps.
+  Timestamps are emitted as naive local ISO (`YYYY-MM-DDTHH:MM:SS`) because the
+  upstream logger writes local time with no zone.
 - `hunting_duration_seconds` = `last_attempt − first_attempt`.
 - `crashes` = count of `ConnectionResetError` occurrences in `stderr.log`.
-- `timeline` = attempts grouped into hourly buckets (UTC), each `{hour, attempts}`.
+- `timeline` = attempts grouped into hourly buckets, each `{hour, attempts}`. The
+  range is filled — every hour between the first and last attempt appears, even ones
+  with zero attempts — so sleep gaps are visible as empty bars.
+- `gaps` = pairs of consecutive attempts more than `GAP_THRESHOLD_SECONDS` (300s)
+  apart. The Mac is not always on; when it sleeps the hunt pauses and resumes on
+  wake, leaving a multi-minute-to-multi-hour hole. Each gap is recorded as
+  `{from, to, duration_seconds}`. `totals.gaps` counts them and
+  `totals.downtime_seconds` sums their durations.
 - `log_tail` = the last 20 parsed attempt lines, each reduced to
   `"<timestamp>  <status>  <short message>"`.
 
@@ -112,23 +121,28 @@ Output `stats.json` shape:
 
 ```json
 {
-  "generated_at": "2026-05-14T11:33:58Z",
+  "generated_at": "2026-05-14T11:33:58",
   "status": "hunting",
   "instance_created": false,
   "vpu_bumped": false,
-  "first_attempt": "2026-05-13T22:41:00Z",
-  "last_attempt": "2026-05-14T11:32:59Z",
+  "first_attempt": "2026-05-13T22:41:00",
+  "last_attempt": "2026-05-14T11:32:59",
   "hunting_duration_seconds": 46319,
   "totals": {
     "attempts": 742,
     "rate_limited_429": 371,
     "out_of_capacity_500": 365,
     "other": 6,
-    "crashes": 8
+    "crashes": 8,
+    "gaps": 3,
+    "downtime_seconds": 11200
   },
   "timeline": [
-    { "hour": "2026-05-14T10:00Z", "attempts": 58 },
-    { "hour": "2026-05-14T11:00Z", "attempts": 33 }
+    { "hour": "2026-05-14T10:00", "attempts": 58 },
+    { "hour": "2026-05-14T11:00", "attempts": 33 }
+  ],
+  "gaps": [
+    { "from": "2026-05-14T01:52:00", "to": "2026-05-14T02:52:00", "duration_seconds": 3600 }
   ],
   "log_tail": [
     "2026-05-14 11:31:59  500  Out of host capacity",
@@ -139,8 +153,9 @@ Output `stats.json` shape:
 
 `status` is `"hunting"` normally and `"instance_created"` once the `INSTANCE_CREATED`
 marker exists. If `launch_instance.log` is missing or empty, the generator still emits
-a valid `stats.json` with zero totals, an empty timeline, an empty `log_tail`, and
-null `first_attempt` / `last_attempt` — the page must render cleanly on a cold start.
+a valid `stats.json` with zero totals, an empty timeline, an empty `gaps` list, an
+empty `log_tail`, and null `first_attempt` / `last_attempt` — the page must render
+cleanly on a cold start.
 
 ### Sanitization boundary
 
@@ -180,17 +195,23 @@ Page sections, top to bottom:
    `status === "instance_created"`, the dot and text flip to Highlight Orange
    `#DA5C2C` and read `✦ INSTANCE CREATED` — an active state, the guide's sanctioned
    use of the accent.
-3. **Stat cards** — a grid of six `#191919` cards (2px radius, 32px padding, subtle
+3. **Stat cards** — a grid of eight `#191919` cards (2px radius, 32px padding, subtle
    shadow, `#3a3a3a` border): a large number in Almost White (BerkeleyMono 700, 32px)
    over a Light Steel label. Cards: attempts, 429 rate-limited, 500 out-of-capacity,
-   crashes, last attempt time, attempts/hour.
+   crashes, offline gaps, downtime, last attempt time, attempts/hour.
 4. **Timeline** — `ATTEMPTS / HOUR` heading over a CSS bar chart, one bar per hourly
-   bucket from `timeline`. Bars are Highlight Orange `#DA5C2C` — the "key data
-   visualization" the guide explicitly reserves the accent for — on the `#000000`
-   base.
-5. **Log tail** — `RECENT ACTIVITY` heading over a monospace list of the ~20
+   bucket from `timeline`. Active-hour bars are Highlight Orange `#DA5C2C` — the "key
+   data visualization" the guide reserves the accent for — on the `#000000` base.
+   Zero-attempt hours render as a dim Medium Gray `#3a3a3a` ghost bar, so the
+   stretches where the Mac was asleep read clearly as offline rather than just low
+   activity.
+5. **Offline gaps** — `OFFLINE GAPS` heading over a monospace list, one line per
+   entry in `gaps`: `<from> → <to>  (<human duration>)` in Light Steel. The Mac is
+   not always on, so this section makes each sleep/downtime hole explicit. Shows
+   `none` when the list is empty.
+6. **Log tail** — `RECENT ACTIVITY` heading over a monospace list of the ~20
    `log_tail` lines in Light Steel, status codes in Stone Accent `#606060`.
-6. **Footer** — a `#111111` band: caption `updated <generated_at> · auto 15m` in
+7. **Footer** — a `#111111` band: caption `updated <generated_at> · auto 15m` in
    Inter, Stone Accent.
 
 `app.js` (~60 lines, no dependencies): on load, `fetch('stats.json')`, populate the
@@ -312,6 +333,9 @@ dashboard/app.js     ┘
    - Counts: attempts, 429, 500, other, crashes match the fixture content.
    - Timeline: hourly bucketing is correct, including an hour with zero attempts
      between two active hours.
+   - Gaps: a fixture with a greater-than-5-minute jump between consecutive attempts
+     produces one `gaps` entry with the right `from` / `to` / `duration_seconds`, and
+     `totals.gaps` / `totals.downtime_seconds` match.
    - `log_tail`: contains the last 20 parsed lines in order.
    - Cold start: missing/empty `launch_instance.log` yields a valid zero-state JSON.
    - Sanitization: a fixture line containing a fake `ocid1.` value, an IPv4 address,
@@ -330,6 +354,8 @@ dashboard/app.js     ┘
   `gh-pages`, and pushes — exiting 0.
 - `https://asracwl.github.io/getOracle/` renders the dashboard with counts, an hourly
   timeline, and a recent-activity tail that match `./vps-ctl.sh status`.
+- Sleep/downtime gaps are visible: the timeline dims zero-attempt hours and the
+  `OFFLINE GAPS` section lists each hole with its duration.
 - `./vps-ctl.sh start` loads both the hunt agent and the 15-minute dashboard agent;
   `./vps-ctl.sh status` shows both plus the live URL.
 - `grep` for `ocid1.`, IPv4 patterns, or `/Users/` in the published `stats.json`
