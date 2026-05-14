@@ -1,44 +1,48 @@
 :root {
-  --color-midnight-ink: #000000;
-  --color-deep-graphite: #111111;
-  --color-charcoal-surface: #191919;
-  --color-medium-gray: #3a3a3a;
-  --color-stone-accent: #606060;
-  --color-light-steel: #b4b4b4;
-  --color-almost-white: #eeeeee;
-  --color-highlight-orange: #DA5C2C;
-  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --radius: 2px;
-  --shadow-subtle: rgba(0, 0, 0, 0.05) 0px 1px 2px 0px;
+  --color-midnight-charcoal: #0a0a0a;
+  --color-off-black: #141414;
+  --color-dark-frost: #1e1e1e;
+  --color-medium-gray: #313131;
+  --color-light-gray: #454545;
+  --color-dim-gray: #7c7c7c;
+  --color-silver-dust: #a7a7a7;
+  --color-polar-white: #ffffff;
+  --color-data-blue: #6798ff;
+  --font-inter: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --radius: 8px;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  background: var(--color-midnight-ink);
-  color: var(--color-light-steel);
-  font-family: var(--font-mono);
-  font-size: 14px;
-  line-height: 1.43;
+  background: var(--color-midnight-charcoal);
+  color: var(--color-silver-dust);
+  font-family: var(--font-inter);
+  font-size: 16px;
+  line-height: 1.5;
+  letter-spacing: -0.012px;
 }
 
 .band {
-  background: var(--color-deep-graphite);
-  padding: 32px 40px;
+  background: var(--color-off-black);
+  padding: 24px 40px;
 }
 
 header h1 {
-  font-weight: 700;
+  font-weight: 600;
   font-size: 24px;
-  color: var(--color-almost-white);
+  line-height: 1.33;
+  letter-spacing: -0.025px;
+  color: var(--color-polar-white);
 }
 
 .subtitle,
 .caption {
-  font-family: var(--font-sans);
-  font-size: 12px;
-  color: var(--color-stone-accent);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  letter-spacing: 0.083px;
+  color: var(--color-dim-gray);
   margin-top: 8px;
 }
 
@@ -48,17 +52,20 @@ main {
   padding: 40px;
   display: flex;
   flex-direction: column;
-  gap: 40px;
+  gap: 32px;
 }
 
 .status-line {
-  font-size: 18px;
-  color: var(--color-light-steel);
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: -0.021px;
+  color: var(--color-polar-white);
 }
 
 .status-line.created {
-  font-weight: 700;
-  color: var(--color-highlight-orange);
+  font-weight: 600;
+  color: var(--color-data-blue);
 }
 
 .cards {
@@ -72,28 +79,34 @@ main {
 }
 
 .card {
-  background: var(--color-charcoal-surface);
+  background: var(--color-off-black);
   border: 1px solid var(--color-medium-gray);
   border-radius: var(--radius);
-  box-shadow: var(--shadow-subtle);
-  padding: 32px;
+  padding: 16px;
 }
 
 .card .value {
-  font-weight: 700;
+  font-weight: 600;
   font-size: 32px;
-  color: var(--color-almost-white);
+  line-height: 1.29;
+  letter-spacing: -0.031px;
+  color: var(--color-polar-white);
 }
 
 .card .label {
-  color: var(--color-light-steel);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.071px;
+  color: var(--color-dim-gray);
   margin-top: 8px;
 }
 
 h2 {
+  font-family: var(--font-mono);
   font-size: 12px;
   font-weight: 400;
-  color: var(--color-stone-accent);
+  letter-spacing: 0.071px;
+  color: var(--color-dim-gray);
   margin-bottom: 16px;
 }
 
@@ -107,7 +120,8 @@ h2 {
 .timeline .bar {
   flex: 1;
   min-height: 2px;
-  background: var(--color-highlight-orange);
+  background: var(--color-data-blue);
+  border-radius: 2px 2px 0 0;
 }
 
 .timeline .bar.empty {
@@ -116,10 +130,14 @@ h2 {
 
 .loglist {
   list-style: none;
-  background: var(--color-charcoal-surface);
+  background: var(--color-off-black);
   border: 1px solid var(--color-medium-gray);
   border-radius: var(--radius);
-  padding: 16px 32px;
+  padding: 16px;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  letter-spacing: 0.071px;
+  color: var(--color-silver-dust);
 }
 
 .loglist li {

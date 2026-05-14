@@ -1,15 +1,15 @@
 {
-  "generated_at": "2026-05-14T13:35:38",
+  "generated_at": "2026-05-14T13:41:41",
   "status": "hunting",
   "instance_created": false,
   "vpu_bumped": false,
   "first_attempt": "2026-05-13T20:59:11",
-  "last_attempt": "2026-05-14T13:35:27",
-  "hunting_duration_seconds": 35846,
+  "last_attempt": "2026-05-14T13:41:32",
+  "hunting_duration_seconds": 36211,
   "totals": {
-    "attempts": 598,
-    "rate_limited_429": 291,
-    "out_of_capacity_500": 307,
+    "attempts": 604,
+    "rate_limited_429": 294,
+    "out_of_capacity_500": 310,
     "other": 0,
     "crashes": 8,
     "gaps": 10,
@@ -86,7 +86,7 @@
     },
     {
       "hour": "2026-05-14T13:00",
-      "attempts": 36
+      "attempts": 42
     }
   ],
   "gaps": [
@@ -142,12 +142,6 @@
     }
   ],
   "log_tail": [
-    "2026-05-14 13:16:13  429  Too many requests for the user",
-    "2026-05-14 13:17:14  500  Out of host capacity.",
-    "2026-05-14 13:18:14  429  Too many requests for the user",
-    "2026-05-14 13:19:16  500  Out of host capacity.",
-    "2026-05-14 13:20:16  429  Too many requests for the user",
-    "2026-05-14 13:21:17  500  Out of host capacity.",
     "2026-05-14 13:22:17  429  Too many requests for the user",
     "2026-05-14 13:23:18  500  Out of host capacity.",
     "2026-05-14 13:24:19  429  Too many requests for the user",
@@ -161,6 +155,12 @@
     "2026-05-14 13:32:25  429  Too many requests for the user",
     "2026-05-14 13:33:26  500  Out of host capacity.",
     "2026-05-14 13:34:26  429  Too many requests for the user",
-    "2026-05-14 13:35:27  500  Out of host capacity."
+    "2026-05-14 13:35:27  500  Out of host capacity.",
+    "2026-05-14 13:36:28  429  Too many requests for the user",
+    "2026-05-14 13:37:29  500  Out of host capacity.",
+    "2026-05-14 13:38:29  429  Too many requests for the user",
+    "2026-05-14 13:39:30  500  Out of host capacity.",
+    "2026-05-14 13:40:31  429  Too many requests for the user",
+    "2026-05-14 13:41:32  500  Out of host capacity."
   ]
 }
