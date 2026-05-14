@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="refresh" content="180">
-  <title>getOracle · capacity watch</title>
+  <title>getOracle</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
@@ -12,7 +12,7 @@
 </head>
 <body>
   <header class="band">
-    <h1>getOracle · capacity watch</h1>
+    <h1>getOracle</h1>
     <p class="subtitle">eu-stockholm-1 · VM.Standard.A1.Flex</p>
   </header>
 
@@ -23,7 +23,16 @@
 
     <section>
       <h2>ATTEMPTS / HOUR</h2>
-      <div class="timeline" id="timeline"></div>
+      <div class="chart">
+        <div class="chart-yaxis" id="chart-yaxis"></div>
+        <div class="chart-main">
+          <div class="chart-plot">
+            <div class="chart-grid" id="chart-grid"></div>
+            <div class="timeline" id="timeline"></div>
+          </div>
+          <div class="chart-xaxis" id="chart-xaxis"></div>
+        </div>
+      </div>
     </section>
 
     <section>

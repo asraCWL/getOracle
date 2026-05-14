@@ -192,9 +192,9 @@ system fallback stacks. 8px border radius, `#313131` Medium Gray borders, no sha
 32px section gaps, 16px card padding.
 
 Page sections, top to bottom:
-1. **Header** — a `#141414` band: title `getOracle · capacity watch` (Inter 600,
-   24px, Polar White `#ffffff`), subtitle `eu-stockholm-1 · VM.Standard.A1.Flex` in
-   JetBrains Mono, Dim Gray `#7c7c7c`.
+1. **Header** — a `#141414` band: title `getOracle` (Inter 600, 24px, Polar White
+   `#ffffff`), subtitle `eu-stockholm-1 · VM.Standard.A1.Flex` in JetBrains Mono,
+   Dim Gray `#7c7c7c`.
 2. **Status line** — `● HUNTING — 9h 45m active` in Polar White `#ffffff` (Inter
    500). When `status === "instance_created"`, it reads `✦ INSTANCE CREATED` in Data
    Blue `#6798ff` — the active state, the guide's sanctioned accent use.
@@ -206,7 +206,11 @@ Page sections, top to bottom:
    bucket from `timeline`. Active-hour bars are Data Blue `#6798ff` — the data-point
    accent the guide reserves it for — on the `#0a0a0a` base. Zero-attempt hours render
    as a dim Medium Gray `#313131` ghost bar, so the stretches where the Mac was asleep
-   read clearly as offline rather than just low activity.
+   read clearly as offline rather than just low activity. A left Y-axis carries
+   whole-number tick labels (the scale snaps up to a round 1/2/5 max so bars align
+   with the ticks) and faint Medium Gray gridlines run across the plot at each tick. A
+   bottom X-axis shows sparse `HH:00` hour labels with a Silver Dust date marker at
+   each midnight, keeping a multi-day chart legible.
 5. **Log tail** — `RECENT ACTIVITY` heading over a JetBrains Mono list of the ~20
    `log_tail` lines in Silver Dust `#a7a7a7`.
 6. **Offline gaps** — `OFFLINE GAPS` heading over a JetBrains Mono list, one line per
