@@ -96,8 +96,8 @@ function renderHero(stats) {
   } else {
     word.textContent = "hunting";
     sub.textContent =
-      "Listening for VM.Standard.A1.Flex capacity in eu-stockholm-1 — " +
-      "retrying on a steady cadence until Oracle opens a slot.";
+      "No free ARM capacity in the region yet. The hunt keeps retrying — " +
+      "and stops the moment Oracle opens a slot.";
   }
 
   const t = stats.totals;
@@ -293,7 +293,7 @@ async function main() {
     renderLog(stats);
     renderGaps(stats);
 
-    document.getElementById("footer-caption").textContent =
+    document.getElementById("updated").textContent =
       `updated ${fmtStamp(parseLocal(stats.generated_at))} · refreshes every 3m`;
 
     setInterval(tickRel, 1000);
