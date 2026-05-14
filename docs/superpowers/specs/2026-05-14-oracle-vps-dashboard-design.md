@@ -38,7 +38,7 @@ the `gh-pages` branch.
 
 **Rejected alternatives:**
 - *Server-side rendered single HTML file:* one self-contained file, no JS — but the
-  Verse-inspired styling would live inside Python string templates (hard to author
+  Axiom-inspired styling would live inside Python string templates (hard to author
   and iterate), and testing would mean parsing generated HTML instead of clean data.
 - *React + Vite build:* adds `node_modules` and a build step before Pages can serve
   anything, buys nothing for a read-only data readout.
@@ -68,7 +68,7 @@ The local repo at `/Users/asamr/OracleVPS/` currently has no remote and one bran
 /Users/asamr/OracleVPS/                     (branch: main, pushed to origin)
 ├── dashboard/
 │   ├── index.html                          # page structure
-│   ├── style.css                           # Verse-inspired styling
+│   ├── style.css                           # Axiom-inspired styling
 │   ├── app.js                              # fetch stats.json, render
 │   └── generate_stats.py                   # logs -> sanitized stats.json
 ├── publish_dashboard.sh                    # regenerate + sync + commit + push
@@ -163,30 +163,39 @@ Rules:
 
 ### `dashboard/index.html`, `style.css`, `app.js`
 
-A single centered-column page, styled after the Verse "midnight command center"
-design guide: full-bleed `#171717` background, IBM Plex Mono throughout (Commit
-Mono's free substitute, loaded from Google Fonts with a system-monospace fallback
-stack), 1px `#e5e7eb` borders, 0px radius everywhere, no shadows or gradients,
-strict monochrome. 80px gaps between sections.
+A single centered-column page, styled after the Axiom "Dark Matter Console" design
+guide: layered dark surfaces — `#000000` page background, `#111111` for the header
+and footer bands, `#191919` for cards — with a single vivid `#DA5C2C` orange accent
+reserved strictly for active states and data visualization. BerkeleyMono throughout
+(IBM Plex Mono is the free substitute, loaded from Google Fonts with a
+system-monospace fallback stack), with Inter for small helper text. 2px border
+radius, `#3a3a3a` borders, the subtle `rgba(0,0,0,0.05) 0 1px 2px` shadow on cards,
+40px section gaps, 32px card padding.
 
 Page sections, top to bottom:
-1. **Header** — title `getOracle · capacity watch` (Commit Mono 600), subtitle
-   `eu-stockholm-1 · VM.Standard.A1.Flex` in Muted Ash `#737373`.
-2. **Status line** — `● HUNTING — 12h 51m elapsed`. When
-   `status === "instance_created"`, flips to a bright `✦ INSTANCE CREATED`
-   treatment. This success state is the *only* color shift on the page.
-3. **Stat cards** — a grid of six bordered cards, each a large number over a Muted
-   Ash label: attempts, 429 rate-limited, 500 out-of-capacity, crashes, last attempt
-   time, attempts/hour.
+1. **Header** — a `#111111` band: title `getOracle · capacity watch` (BerkeleyMono
+   700, 24px, Almost White `#eeeeee`), subtitle `eu-stockholm-1 · VM.Standard.A1.Flex`
+   in Inter, Stone Accent `#606060`.
+2. **Status line** — `● HUNTING — 12h 51m elapsed` in Light Steel `#b4b4b4`. When
+   `status === "instance_created"`, the dot and text flip to Highlight Orange
+   `#DA5C2C` and read `✦ INSTANCE CREATED` — an active state, the guide's sanctioned
+   use of the accent.
+3. **Stat cards** — a grid of six `#191919` cards (2px radius, 32px padding, subtle
+   shadow, `#3a3a3a` border): a large number in Almost White (BerkeleyMono 700, 32px)
+   over a Light Steel label. Cards: attempts, 429 rate-limited, 500 out-of-capacity,
+   crashes, last attempt time, attempts/hour.
 4. **Timeline** — `ATTEMPTS / HOUR` heading over a CSS bar chart, one bar per hourly
-   bucket from `timeline`, Digital Silver bars on Deep Space.
+   bucket from `timeline`. Bars are Highlight Orange `#DA5C2C` — the "key data
+   visualization" the guide explicitly reserves the accent for — on the `#000000`
+   base.
 5. **Log tail** — `RECENT ACTIVITY` heading over a monospace list of the ~20
-   `log_tail` lines, status codes in Muted Ash.
-6. **Footer** — caption `updated <generated_at> · auto 15m`, Muted Ash.
+   `log_tail` lines in Light Steel, status codes in Stone Accent `#606060`.
+6. **Footer** — a `#111111` band: caption `updated <generated_at> · auto 15m` in
+   Inter, Stone Accent.
 
 `app.js` (~60 lines, no dependencies): on load, `fetch('stats.json')`, populate the
 numbers, build the timeline bars, fill the log tail, stamp the footer, and apply the
-success state if `status === "instance_created"`. `index.html` carries a
+orange active state if `status === "instance_created"`. `index.html` carries a
 `<meta http-equiv="refresh">` tag so an open tab reloads every few minutes and stays
 current. On a `fetch` failure the page shows a plain "stats unavailable" line rather
 than breaking.
