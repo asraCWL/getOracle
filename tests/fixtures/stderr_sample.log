@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "main.py", line 435, in launch_instance
+    launch_instance()
+oci.exceptions.RequestException: (ProtocolError('Connection aborted.', ConnectionResetError(54, 'Connection reset by peer')), 'Request Endpoint: POST https://iaas.eu-stockholm-1.oraclecloud.com/20160918/instances')
+Traceback (most recent call last):
+  File "main.py", line 435, in launch_instance
+    launch_instance()
+oci.exceptions.RequestException: (ProtocolError('Connection aborted.', ConnectionResetError(54, 'Connection reset by peer')), 'Request Endpoint: POST https://iaas.eu-stockholm-1.oraclecloud.com/20160918/instances')

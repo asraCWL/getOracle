@@ -1,0 +1,4 @@
+2026-05-14 09:00:00,000 - INFO - Command: launch_instance--
+Output: {'status': 200, 'code': 'OK', 'message': 'instance ocid1.instance.oc1.fake at 203.0.113.7 cfg /Users/asamr/secret'}
+2026-05-14 09:01:00,000 - INFO - Command: launch_instance--
+Output: {'status': 429, 'code': 'TooManyRequests', 'message': 'Too many requests for the user'}

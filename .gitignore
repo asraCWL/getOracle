@@ -5,6 +5,9 @@ oracle-freetier-instance-creation/
 logs/
 *.log
 
+# Test fixtures are *.log files that must be tracked
+!tests/fixtures/*.log
+
 # Python
 __pycache__/
 *.pyc
