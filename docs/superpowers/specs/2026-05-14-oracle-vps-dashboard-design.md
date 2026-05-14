@@ -104,7 +104,6 @@ Parsing:
 - `first_attempt` / `last_attempt` come from the first and last attempt timestamps.
   Timestamps are emitted as naive local ISO (`YYYY-MM-DDTHH:MM:SS`) because the
   upstream logger writes local time with no zone.
-- `hunting_duration_seconds` = `last_attempt − first_attempt`.
 - `crashes` = count of `ConnectionResetError` occurrences in `stderr.log`.
 - `timeline` = attempts grouped into hourly buckets, each `{hour, attempts}`. The
   range is filled — every hour between the first and last attempt appears, even ones
@@ -114,6 +113,10 @@ Parsing:
   wake, leaving a multi-minute-to-multi-hour hole. Each gap is recorded as
   `{from, to, duration_seconds}`. `totals.gaps` counts them and
   `totals.downtime_seconds` sums their durations.
+- `hunting_duration_seconds` = active hunting time =
+  `(last_attempt − first_attempt) − totals.downtime_seconds`. The offline gaps are
+  subtracted, so this reflects time the Mac was actually hunting — not wall-clock
+  time since the first attempt.
 - `log_tail` = the last 20 parsed attempt lines, each reduced to
   `"<timestamp>  <status>  <short message>"`.
 
@@ -127,7 +130,7 @@ Output `stats.json` shape:
   "vpu_bumped": false,
   "first_attempt": "2026-05-13T22:41:00",
   "last_attempt": "2026-05-14T11:32:59",
-  "hunting_duration_seconds": 46319,
+  "hunting_duration_seconds": 35119,
   "totals": {
     "attempts": 742,
     "rate_limited_429": 371,
@@ -191,7 +194,7 @@ Page sections, top to bottom:
 1. **Header** — a `#111111` band: title `getOracle · capacity watch` (BerkeleyMono
    700, 24px, Almost White `#eeeeee`), subtitle `eu-stockholm-1 · VM.Standard.A1.Flex`
    in Inter, Stone Accent `#606060`.
-2. **Status line** — `● HUNTING — 12h 51m elapsed` in Light Steel `#b4b4b4`. When
+2. **Status line** — `● HUNTING — 9h 45m active` in Light Steel `#b4b4b4`. When
    `status === "instance_created"`, the dot and text flip to Highlight Orange
    `#DA5C2C` and read `✦ INSTANCE CREATED` — an active state, the guide's sanctioned
    use of the accent.
