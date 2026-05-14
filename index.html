@@ -13,7 +13,7 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Ccircle%20cx='16'%20cy='16'%20r='11'%20fill='none'%20stroke='%23f0a23c'%20stroke-width='2.5'/%3E%3Ccircle%20cx='16'%20cy='16'%20r='4'%20fill='%23f0a23c'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body class="state-hunting">
@@ -23,7 +23,10 @@
   <div class="frame">
     <header class="masthead">
       <span class="wordmark">getOracle</span>
-      <span class="coords">eu-stockholm-1 · VM.Standard.A1.Flex</span>
+      <div class="masthead-meta">
+        <span class="coords">eu-stockholm-1 · VM.Standard.A1.Flex</span>
+        <span class="updated" id="updated">—</span>
+      </div>
     </header>
 
     <section class="hero" id="hero">
@@ -87,11 +90,6 @@
       <div class="panel-head"><h2>Offline gaps</h2></div>
       <ul class="gaplist" id="gaps"></ul>
     </section>
-
-    <footer class="footer">
-      <span class="footer-mark">getOracle</span>
-      <span id="footer-caption">—</span>
-    </footer>
   </div>
 
   <script src="app.js"></script>

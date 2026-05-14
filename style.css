@@ -1,7 +1,8 @@
 /* getOracle — "Observatory watch" dashboard.
-   A dark listening station: editorial serif accents over monospace data,
-   a state-driven signal colour (amber while hunting, green on success,
-   red if the feed drops). Swap --signal and the whole page re-themes. */
+   A dark listening station rendered entirely in monospace: hierarchy comes
+   from weight, scale and colour, not a second typeface. A state-driven
+   signal colour (amber while hunting, green on success, red if the feed
+   drops) re-themes the whole page from one variable. */
 
 :root {
   --ink:        #07090c;
@@ -9,7 +10,6 @@
   --panel-2:    #10141a;
   --line:       #1b212b;
   --line-bright:#283140;
-  --dim:        #59657580;
   --dim-solid:  #5b6675;
   --mid:        #8b97a6;
   --text:       #bcc6d1;
@@ -24,8 +24,7 @@
 
   --reject:  #d97a6a;
 
-  --serif: 'Instrument Serif', ui-serif, Georgia, 'Times New Roman', serif;
-  --mono:  'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
   --radius: 4px;
   --plot-height: 178px;
@@ -96,12 +95,12 @@ body::before {
 .frame {
   max-width: 880px;
   margin: 0 auto;
-  padding: 0 var(--frame-pad) 64px;
+  padding: 0 var(--frame-pad) 80px;
 }
 
 .masthead {
   display: flex;
-  align-items: baseline;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
   padding: 26px 0 22px;
@@ -109,11 +108,18 @@ body::before {
 }
 
 .wordmark {
-  font-family: var(--serif);
-  font-size: 30px;
-  line-height: 1;
-  letter-spacing: 0.01em;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
   color: var(--bright);
+}
+
+.masthead-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  text-align: right;
 }
 
 .coords {
@@ -121,6 +127,12 @@ body::before {
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--dim-solid);
+}
+
+.updated {
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  color: var(--line-bright);
 }
 
 /* ---- hero ---------------------------------------------------------------- */
@@ -133,14 +145,14 @@ body::before {
 .hero-state {
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 16px;
 }
 
 .dot {
   position: relative;
   flex: none;
-  width: 13px;
-  height: 13px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   background: var(--signal);
   box-shadow: 0 0 0 0 var(--signal-glow);
@@ -150,24 +162,23 @@ body::before {
 
 @keyframes pulse {
   0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--signal) 55%, transparent); }
-  70%  { box-shadow: 0 0 0 16px transparent; }
+  70%  { box-shadow: 0 0 0 15px transparent; }
   100% { box-shadow: 0 0 0 0 transparent; }
 }
 
 .state-word {
-  font-family: var(--serif);
-  font-size: clamp(44px, 9vw, 76px);
-  font-weight: 400;
-  line-height: 0.98;
-  letter-spacing: -0.005em;
+  font-size: clamp(32px, 6.5vw, 52px);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
   color: var(--bright);
 }
 body.state-created .state-word,
-body.state-error   .state-word { font-style: italic; color: var(--signal-ink); }
+body.state-error   .state-word { color: var(--signal-ink); }
 
 .hero-sub {
   margin-top: 18px;
-  max-width: 46ch;
+  max-width: 52ch;
   color: var(--mid);
   font-size: 14px;
   line-height: 1.65;
@@ -191,9 +202,10 @@ body.state-error   .state-word { font-style: italic; color: var(--signal-ink); }
 }
 
 .metric-value {
-  font-family: var(--serif);
-  font-size: clamp(40px, 7vw, 58px);
-  line-height: 1;
+  font-size: clamp(30px, 5.5vw, 44px);
+  font-weight: 500;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
   color: var(--bright);
   font-variant-numeric: tabular-nums;
 }
@@ -233,18 +245,18 @@ body.state-error   .state-word { font-style: italic; color: var(--signal-ink); }
 }
 
 .panel h2 {
-  font-family: var(--serif);
-  font-size: 21px;
-  font-weight: 400;
-  letter-spacing: 0.005em;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
   color: var(--bright);
 }
 .panel h2::before {
   content: "";
   display: inline-block;
-  width: 16px;
+  width: 14px;
   height: 1px;
-  margin: 0 11px 5px 0;
+  margin: 0 10px 3px 0;
   background: var(--signal-line);
   vertical-align: middle;
 }
@@ -433,8 +445,8 @@ body.state-error   .state-word { font-style: italic; color: var(--signal-ink); }
   font-weight: 500;
 }
 .stat-num {
-  font-family: var(--serif);
-  font-size: 30px;
+  font-size: 25px;
+  font-weight: 500;
   line-height: 1;
   color: var(--bright);
   font-variant-numeric: tabular-nums;
@@ -499,37 +511,15 @@ body.state-error   .state-word { font-style: italic; color: var(--signal-ink); }
   letter-spacing: 0.03em;
 }
 
-/* ---- footer -------------------------------------------------------------- */
-
-.footer {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 16px;
-  margin-top: 56px;
-  padding-top: 22px;
-  border-top: 1px solid var(--line);
-  font-size: 11px;
-  letter-spacing: 0.05em;
-  color: var(--dim-solid);
-}
-.footer-mark {
-  font-family: var(--serif);
-  font-size: 15px;
-  letter-spacing: 0.02em;
-  color: var(--mid);
-}
-
 /* ---- load-in stagger ----------------------------------------------------- */
 
-.masthead, .hero, .chart-panel, .panel-row, .panel, .footer {
+.masthead, .hero, .chart-panel, .panel-row, .panel {
   animation: rise 620ms cubic-bezier(.2,.7,.2,1) backwards;
 }
 .hero       { animation-delay: 60ms; }
 .chart-panel{ animation-delay: 130ms; }
 .panel-row  { animation-delay: 190ms; }
 .panel-row ~ .panel { animation-delay: 250ms; }
-.footer     { animation-delay: 310ms; }
 
 @keyframes rise {
   from { opacity: 0; transform: translateY(14px); }
@@ -540,12 +530,12 @@ body.state-error   .state-word { font-style: italic; color: var(--signal-ink); }
 
 @media (max-width: 620px) {
   :root { --frame-pad: 22px; --plot-height: 150px; }
-  .masthead { flex-direction: column; gap: 4px; }
+  .masthead { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .masthead-meta { align-items: flex-start; text-align: left; }
   .hero { padding: 40px 0 38px; }
   .hero-metrics { gap: 22px; }
   .panel-row { grid-template-columns: 1fr; gap: 0; }
   .panel-row .panel:last-child { margin-top: 40px; }
-  .footer { flex-direction: column; gap: 6px; }
 }
 
 /* ---- reduced motion ------------------------------------------------------ */
