@@ -8,6 +8,7 @@ SCRIPTS=(
   "$ROOT/setup_mac.sh"
   "$ROOT/run_loop.sh"
   "$ROOT/vps-ctl.sh"
+  "$ROOT/publish_dashboard.sh"
 )
 
 fail=0

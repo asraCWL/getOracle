@@ -13,6 +13,12 @@ __pycache__/
 *.pyc
 .pytest_cache/
 
+# Dashboard — gh-pages worktree, and the generated stats file (only ever
+# belongs in the worktree; the line below guards against an accidental
+# commit if it is generated into dashboard/ during local verification).
+.gh-pages/
+dashboard/stats.json
+
 # macOS
 .DS_Store
 
