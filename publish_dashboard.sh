@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/bin/bash
 # Regenerate the dashboard's sanitized stats, sync the static assets into the
 # gh-pages worktree, and push. Runs every 15 min via the dashboard LaunchAgent
 # and on demand via ./vps-ctl.sh publish. Non-fatal on failure — a failed
@@ -44,6 +44,11 @@ if [ ! -x "$VENV_PYTHON" ]; then
 fi
 
 ensure_worktree
+
+# Always rebuild on top of origin's tip — protects against stale local gh-pages
+# if another publisher (or an older Mac run) advanced the remote in the meantime.
+git -C "$WORKTREE" fetch --quiet origin "$BRANCH" 2>/dev/null || true
+git -C "$WORKTREE" reset --hard "origin/$BRANCH" --quiet 2>/dev/null || true
 
 "$VENV_PYTHON" "$DASHBOARD_DIR/generate_stats.py" \
   --launch-log "$UPSTREAM_DIR/launch_instance.log" \
