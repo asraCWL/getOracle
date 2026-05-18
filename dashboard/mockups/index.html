@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>getOracle — mockups</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #07090c; --panel: #0d1118; --rule: #1c2230;
+      --dim: #5a6377; --muted: #8b96a8; --text: #cdd5e2; --bright: #f0f3f8;
+      --signal: #f0a23c;
+      --serif: 'Fraunces', Georgia, serif;
+      --mono: 'JetBrains Mono', ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--ink); color: var(--text);
+      font-family: var(--mono); font-size: 14px; line-height: 1.55;
+      min-height: 100vh;
+      padding: 56px clamp(20px, 5vw, 48px) 80px;
+    }
+    body::before {
+      content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+      background: radial-gradient(70% 40% at 50% 0%, color-mix(in srgb, var(--signal) 18%, transparent) 0%, transparent 65%);
+    }
+    .wrap { max-width: 880px; margin: 0 auto; }
+    header { border-bottom: 1px solid var(--rule); padding-bottom: 22px; }
+    .eyebrow {
+      font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--dim);
+    }
+    h1 {
+      font-family: var(--serif); font-weight: 400;
+      font-size: clamp(36px, 6vw, 56px); line-height: 1;
+      letter-spacing: -0.025em; color: var(--bright);
+      margin-top: 8px;
+    }
+    h1 em { font-style: italic; color: var(--signal); }
+    .sub {
+      margin-top: 14px; max-width: 56ch;
+      color: var(--muted); font-size: 13.5px;
+    }
+    .sub a { color: var(--signal); text-decoration: none; border-bottom: 1px dashed currentColor; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 22px;
+      margin-top: 36px;
+    }
+    @media (max-width: 640px) {
+      .grid { grid-template-columns: 1fr; gap: 16px; }
+    }
+
+    .card {
+      display: block;
+      padding: 26px 24px 22px;
+      background: var(--panel);
+      border: 1px solid var(--rule);
+      border-radius: 6px;
+      text-decoration: none;
+      color: inherit;
+      position: relative;
+      overflow: hidden;
+      transition: transform 200ms ease, border-color 200ms ease;
+    }
+    .card:hover {
+      transform: translateY(-3px);
+      border-color: color-mix(in srgb, var(--signal) 50%, var(--rule));
+    }
+    .card .num {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      color: var(--signal);
+    }
+    .card h2 {
+      margin-top: 8px;
+      font-family: var(--serif);
+      font-weight: 500;
+      font-size: 24px;
+      letter-spacing: -0.012em;
+      color: var(--bright);
+    }
+    .card h2 em { font-style: italic; color: var(--signal); font-weight: 400; }
+    .card .desc {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .card .tags {
+      margin-top: 14px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .card .tag {
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border: 1px solid var(--rule);
+      border-radius: 3px;
+      color: var(--dim);
+    }
+    .card .tag.hot { color: var(--signal); border-color: color-mix(in srgb, var(--signal) 40%, var(--rule)); }
+
+    /* a tiny mood-swatch strip at the top of each card */
+    .card .swatch {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+    }
+    .card.c1 .swatch { background: linear-gradient(90deg, #08090d, #f0a23c); }
+    .card.c2 .swatch { background: linear-gradient(90deg, #040806, #6cff8a); }
+    .card.c3 .swatch { background: linear-gradient(90deg, #ece1c5, #b9742a); }
+    .card.c4 .swatch { background: linear-gradient(90deg, #06090f, #6ddfe6); }
+
+    .note {
+      margin-top: 36px;
+      padding-top: 22px;
+      border-top: 1px solid var(--rule);
+      font-size: 12px;
+      color: var(--dim);
+      letter-spacing: 0.04em;
+    }
+    .note code {
+      font-family: var(--mono);
+      color: var(--text);
+      background: var(--panel);
+      padding: 2px 6px;
+      border-radius: 3px;
+      border: 1px solid var(--rule);
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="eyebrow">getOracle · dashboard redesign</div>
+      <h1>Almanac <em>font variants.</em></h1>
+      <p class="sub">
+        Mockup 1 is the pick, with three serif options to compare. Originals from the first round still below.
+        Source data fetched live from
+        <a href="https://asracwl.github.io/getOracle/">asracwl.github.io/getOracle</a>.
+        Each is a working preview fetching the same live <code style="background:#0d1118;padding:0 4px;border:1px solid #1c2230;border-radius:3px;font-family:var(--mono)">stats.json</code>.
+        All four are mobile-first — resize the window or open on your phone.
+      </p>
+    </header>
+
+    <div class="grid">
+      <a class="card c1" href="1d-manrope.html" style="grid-column:1/-1">
+        <div class="swatch"></div>
+        <div class="num">No. 01d — padelytics match</div>
+        <h2>Almanac · <em>Manrope</em></h2>
+        <p class="desc">
+          Same font pairing as padelytics.dk — Manrope (display) + JetBrains Mono (data). Sans, not serif. Geometric humanist with proper warmth. Hero bumped to 700 weight; italics removed since Manrope ships none. This is the candidate to beat.
+        </p>
+        <div class="tags">
+          <span class="tag hot">padelytics font</span>
+          <span class="tag">sans</span>
+          <span class="tag">700 weight hero</span>
+          <span class="tag">no italics</span>
+        </div>
+      </a>
+
+      <a class="card c1" href="1a-newsreader.html">
+        <div class="swatch"></div>
+        <div class="num">No. 01a</div>
+        <h2>Almanac · <em>Newsreader</em></h2>
+        <p class="desc">
+          A refined, book-like serif. Adelle-adjacent — humanist, narrow proportions, easy on the eye at large sizes. Quietest of the three, most "magazine column."
+        </p>
+        <div class="tags">
+          <span class="tag hot">refined</span>
+          <span class="tag">humanist</span>
+          <span class="tag">book</span>
+        </div>
+      </a>
+
+      <a class="card c1" href="1b-sourceserif.html">
+        <div class="swatch"></div>
+        <div class="num">No. 01b</div>
+        <h2>Almanac · <em>Source Serif&nbsp;4</em></h2>
+        <p class="desc">
+          Adobe's open-source workhorse. More technical / mid-century than Newsreader; tabular numbers are immaculate. A serif that doesn't try to be loud.
+        </p>
+        <div class="tags">
+          <span class="tag hot">technical</span>
+          <span class="tag">workhorse</span>
+          <span class="tag">restrained</span>
+        </div>
+      </a>
+
+      <a class="card c1" href="1c-instrument.html">
+        <div class="swatch"></div>
+        <div class="num">No. 01c</div>
+        <h2>Almanac · <em>Instrument Serif</em></h2>
+        <p class="desc">
+          High-contrast display serif. The thin verticals and dramatic curves give the headlines real presence. Sharper, more editorial — leans Vogue / NYT Opinion.
+        </p>
+        <div class="tags">
+          <span class="tag hot">high-contrast</span>
+          <span class="tag">display</span>
+          <span class="tag">editorial</span>
+        </div>
+      </a>
+
+      <a class="card c1" href="1-almanac.html" style="opacity:.7">
+        <div class="swatch"></div>
+        <div class="num">No. 01 (original)</div>
+        <h2>Almanac · <em>Fraunces</em></h2>
+        <p class="desc">
+          The original Fraunces version, for reference. The one you said felt off.
+        </p>
+        <div class="tags">
+          <span class="tag">reference</span>
+        </div>
+      </a>
+
+      <a class="card c2" href="2-terminal.html" style="opacity:.5">
+        <div class="swatch"></div>
+        <div class="num">No. 02</div>
+        <h2>The <em>Terminal</em></h2>
+        <p class="desc">
+          Phosphor-green CRT console. VT323 + JetBrains Mono, scanlines, glowing text. The chart is a Unicode-block sparkline grid (▁▂▃▄▅▆▇█). Most utilitarian and arguably the most fun.
+        </p>
+        <div class="tags">
+          <span class="tag hot">green/black</span>
+          <span class="tag">all-mono</span>
+          <span class="tag">sparkline</span>
+          <span class="tag">retro</span>
+        </div>
+      </a>
+
+      <a class="card c3" href="3-parchment.html" style="opacity:.5">
+        <div class="swatch"></div>
+        <div class="num">No. 03</div>
+        <h2>The <em>Field Log</em></h2>
+        <p class="desc">
+          Light theme — warm cream paper, deep ink, Spectral + Fraunces italics. A hand-drawn SVG sparkline trace, a wax-seal status pill, and a magazine-style ledger. Most distant from today's design.
+        </p>
+        <div class="tags">
+          <span class="tag hot">cream/ink</span>
+          <span class="tag">serif</span>
+          <span class="tag">sparkline</span>
+          <span class="tag">light theme</span>
+        </div>
+      </a>
+
+      <a class="card c4" href="4-dial.html" style="opacity:.5">
+        <div class="swatch"></div>
+        <div class="num">No. 04</div>
+        <h2>The <em>Dial</em></h2>
+        <p class="desc">
+          A single polar SVG instrument as the hero: concentric rings = days, 24 segments per ring = hours, intensity = attempts. Hour bezel labels and a slow radar sweep. Bricolage Grotesque + JetBrains Mono.
+        </p>
+        <div class="tags">
+          <span class="tag hot">teal/dark</span>
+          <span class="tag">grotesk + mono</span>
+          <span class="tag">polar SVG</span>
+          <span class="tag">instrument</span>
+        </div>
+      </a>
+    </div>
+
+    <p class="note">
+      To preview: <code>open dashboard/mockups/index.html</code> — or any of the four files directly.
+      All fetch live data from the published stats.json, so you'll see the real current state of the watch.
+    </p>
+  </div>
+</body>
+</html>

@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>getOracle — FIELD LOG mockup</title>
+  <meta name="theme-color" content="#ece1c5">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Spectral:ital,wght@0,400;0,500;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    /* getOracle v2 — FIELD LOG mockup.
+       Deliberately the inverse of the current observatory: a warm cream
+       page that reads like a researcher's bound journal. Spectral for
+       body copy, Fraunces (italic) for headlines, JetBrains Mono for
+       any tabular data. SVG sparkline replaces the bar chart. */
+
+    :root {
+      --paper:      #ece1c5;
+      --paper-2:    #e1d5b6;
+      --paper-3:    #d5c69e;
+      --ink:        #1f1c28;
+      --ink-soft:   #45403a;
+      --ink-dim:    #7a7060;
+      --muted:      #9a8e75;
+      --rule:       #c1b390;
+      --rule-2:     #9c8c66;
+
+      --signal:     #b9742a;        /* warm sienna in place of amber */
+      --signal-2:   #8b4e1c;
+      --reject:     #8a2c20;
+      --cool:       #2f4858;
+      --seal:       #962d22;
+
+      --serif:   'Fraunces', 'Iowan Old Style', Georgia, serif;
+      --body:    'Spectral', 'Charter', Georgia, serif;
+      --mono:    'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+      --gutter:  clamp(22px, 5vw, 56px);
+    }
+
+    body.state-created { --signal: #2f6b3d; --signal-2: #1d4a27; }
+    body.state-error   { --signal: var(--seal); --signal-2: #6d1f17; }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-text-size-adjust: 100%; }
+
+    body {
+      background: var(--paper);
+      color: var(--ink-soft);
+      font-family: var(--body);
+      font-size: 16px;
+      line-height: 1.55;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* paper texture + warm vignette */
+    body::before {
+      content: "";
+      position: fixed; inset: 0;
+      z-index: -2;
+      pointer-events: none;
+      background:
+        radial-gradient(120% 90% at 50% 0%, color-mix(in srgb, var(--paper-3) 40%, transparent) 0%, transparent 70%),
+        radial-gradient(80% 60% at 50% 110%, color-mix(in srgb, var(--paper-3) 50%, transparent) 0%, transparent 70%);
+    }
+    body::after {
+      content: "";
+      position: fixed; inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      opacity: 0.18;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .12  0 0 0 0 .08  0 0 0 0 .05  0 0 0 .6 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      mix-blend-mode: multiply;
+    }
+
+    main {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 0 var(--gutter) clamp(60px, 12vw, 120px);
+    }
+
+    /* ── masthead ────────────────────────────────────────────────── */
+
+    .masthead {
+      position: relative;
+      padding: clamp(28px, 5vw, 42px) 0 clamp(22px, 4vw, 30px);
+      border-bottom: 1.5px solid var(--ink-soft);
+    }
+    .masthead::after {
+      content: "";
+      position: absolute;
+      left: 0; right: 0;
+      bottom: -4px;
+      height: 1px;
+      background: var(--ink-soft);
+    }
+
+    .mast-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink-dim);
+    }
+
+    .mast-title {
+      margin-top: 16px;
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 400;
+      font-size: clamp(38px, 8.5vw, 62px);
+      line-height: 1;
+      letter-spacing: -0.018em;
+      color: var(--ink);
+    }
+    .mast-title .the {
+      display: block;
+      font-style: normal;
+      font-size: 0.5em;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      color: var(--ink-dim);
+      margin-bottom: 6px;
+    }
+
+    .mast-meta {
+      margin-top: 14px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 28px;
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--ink-dim);
+    }
+    .mast-meta b { color: var(--ink); font-weight: 500; }
+
+    /* a wax-seal style status pill sitting on the right of the masthead */
+    .seal {
+      position: absolute;
+      right: 0;
+      top: clamp(24px, 4vw, 36px);
+      width: clamp(72px, 14vw, 96px);
+      aspect-ratio: 1 / 1;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--signal) 95%, #fff) 0%, var(--signal) 38%, var(--signal-2) 100%);
+      box-shadow:
+        inset 0 0 0 2px color-mix(in srgb, var(--signal-2) 60%, transparent),
+        inset -6px -6px 14px color-mix(in srgb, var(--signal-2) 50%, transparent),
+        0 2px 6px color-mix(in srgb, #000 28%, transparent);
+      display: grid;
+      place-items: center;
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #f7ecd0;
+      text-align: center;
+      text-shadow: 0 1px 0 color-mix(in srgb, #000 35%, transparent);
+      transform: rotate(-7deg);
+    }
+    .seal span { display: block; padding: 0 6px; line-height: 1.1; }
+    @media (max-width: 520px) {
+      .seal {
+        position: static;
+        margin-top: 16px;
+        margin-left: 0;
+        width: 72px;
+      }
+    }
+
+    /* ── lede ────────────────────────────────────────────────────── */
+
+    .lede {
+      padding: clamp(28px, 5vw, 44px) 0 clamp(28px, 5vw, 40px);
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .lede-eyebrow {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--ink-dim);
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .lede-eyebrow::before, .lede-eyebrow::after {
+      content: "";
+      width: 22px; height: 1px;
+      background: var(--ink-dim);
+    }
+
+    .lede-title {
+      margin-top: 14px;
+      font-family: var(--serif);
+      font-weight: 400;
+      font-size: clamp(40px, 9vw, 76px);
+      line-height: 1;
+      letter-spacing: -0.025em;
+      color: var(--ink);
+    }
+    .lede-title .accent {
+      font-style: italic;
+      color: var(--signal-2);
+    }
+
+    .lede-body {
+      margin-top: clamp(20px, 4vw, 28px);
+      max-width: 36em;
+      font-family: var(--body);
+      font-size: 18px;
+      line-height: 1.6;
+      color: var(--ink-soft);
+    }
+    .lede-body strong {
+      color: var(--ink);
+      font-weight: 500;
+    }
+    .lede-body em {
+      font-style: italic;
+      color: var(--ink);
+    }
+
+    /* ── ruled stats row ─────────────────────────────────────────── */
+
+    .ruled {
+      margin-top: clamp(28px, 5vw, 38px);
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+      border-top: 1px solid var(--ink-soft);
+      border-bottom: 1px solid var(--ink-soft);
+    }
+    .ruled .cell {
+      padding: 18px 16px 16px 0;
+      border-right: 1px solid var(--rule);
+    }
+    .ruled .cell:last-child { border-right: none; }
+    .ruled .cell:not(:first-child) { padding-left: 18px; }
+    .ruled dt {
+      font-family: var(--mono);
+      font-size: 10.5px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--ink-dim);
+    }
+    .ruled dd {
+      margin-top: 6px;
+      font-family: var(--serif);
+      font-weight: 500;
+      font-size: clamp(28px, 5vw, 38px);
+      line-height: 1;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      font-variant-numeric: tabular-nums;
+    }
+    .ruled dd .u {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0.04em;
+      color: var(--ink-dim);
+      margin-left: 4px;
+    }
+    @media (max-width: 520px) {
+      .ruled { grid-template-columns: 1fr 1fr; }
+      .ruled .cell:nth-child(2n) { border-right: none; }
+      .ruled .cell:nth-child(3) { border-top: 1px solid var(--rule); padding-top: 16px; }
+    }
+
+    /* ── section headings ────────────────────────────────────────── */
+
+    .section {
+      margin-top: clamp(40px, 7vw, 60px);
+    }
+
+    .section-head {
+      display: flex;
+      align-items: baseline;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+    .section-head::before {
+      content: "§";
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 32px;
+      line-height: 1;
+      color: var(--signal-2);
+    }
+    .section-head h2 {
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 500;
+      font-size: 24px;
+      letter-spacing: -0.012em;
+      color: var(--ink);
+    }
+    .section-note {
+      margin-left: auto;
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink-dim);
+    }
+
+    /* ── sparkline ───────────────────────────────────────────────── */
+
+    .trace {
+      padding: 24px 20px 20px;
+      background: linear-gradient(180deg, color-mix(in srgb, var(--paper-2) 80%, var(--paper)) 0%, var(--paper-2) 100%);
+      border: 1px solid var(--rule-2);
+      border-radius: 3px;
+      position: relative;
+    }
+    .trace::before {
+      /* faint horizontal lines like a graph paper page */
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background-image: linear-gradient(0deg, transparent calc(100% - 1px), color-mix(in srgb, var(--rule) 50%, transparent) 100%);
+      background-size: 100% 18px;
+      border-radius: 3px;
+      opacity: .45;
+    }
+    .trace svg {
+      display: block;
+      width: 100%;
+      height: clamp(120px, 22vw, 180px);
+      position: relative;
+    }
+    .trace .legend {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px dashed var(--rule);
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink-dim);
+    }
+
+    /* ── two-column ledger ───────────────────────────────────────── */
+
+    .ledger {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(24px, 4vw, 48px);
+    }
+    @media (max-width: 600px) {
+      .ledger { grid-template-columns: 1fr; }
+    }
+
+    .ledger h3 {
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 500;
+      font-size: 19px;
+      color: var(--ink);
+      margin-bottom: 8px;
+    }
+    .ledger .kv {
+      list-style: none;
+    }
+    .ledger .kv li {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      padding: 10px 0;
+      border-bottom: 1px dashed var(--rule);
+    }
+    .ledger .kv li:last-child { border-bottom: none; }
+    .ledger .kv .code {
+      flex: none;
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      color: var(--signal-2);
+      width: 3.5ch;
+    }
+    .ledger .kv .code.c500 { color: var(--reject); }
+    .ledger .kv .k {
+      flex: 1;
+      font-family: var(--body);
+      font-style: italic;
+      color: var(--ink-soft);
+      font-size: 15.5px;
+    }
+    .ledger .kv .v {
+      font-family: var(--serif);
+      font-weight: 500;
+      font-size: 22px;
+      line-height: 1;
+      color: var(--ink);
+      font-variant-numeric: tabular-nums;
+    }
+    .ledger .kv .v .u {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 400;
+      color: var(--ink-dim);
+      margin-left: 3px;
+    }
+
+    /* ── dispatches log ──────────────────────────────────────────── */
+
+    .dispatches {
+      list-style: none;
+    }
+    .dispatches li {
+      display: grid;
+      grid-template-columns: auto auto 1fr;
+      align-items: baseline;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px dashed var(--rule);
+      font-size: 15px;
+    }
+    .dispatches li:last-child { border-bottom: none; }
+    .dispatches .ts {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--ink-dim);
+      letter-spacing: 0.04em;
+    }
+    .dispatches .code {
+      font-family: var(--mono);
+      font-size: 10.5px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      padding: 1px 7px;
+      border-radius: 2px;
+      border: 1px solid currentColor;
+      color: var(--signal-2);
+    }
+    .dispatches .code.c500 { color: var(--reject); }
+    .dispatches .msg {
+      font-family: var(--body);
+      font-style: italic;
+      color: var(--ink-soft);
+      overflow-wrap: anywhere;
+    }
+    @media (max-width: 520px) {
+      .dispatches li {
+        grid-template-columns: auto 1fr;
+        row-gap: 2px;
+      }
+      .dispatches .code { justify-self: end; grid-row: 1; grid-column: 2; }
+      .dispatches .ts { grid-row: 1; grid-column: 1; }
+      .dispatches .msg { grid-row: 2; grid-column: 1 / -1; font-size: 14.5px; }
+    }
+
+    /* ── gaps ────────────────────────────────────────────────────── */
+
+    .gaps {
+      list-style: none;
+    }
+    .gaps li {
+      display: grid;
+      grid-template-columns: auto auto 1fr auto;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px dashed var(--rule);
+      font-family: var(--mono);
+      font-size: 12.5px;
+      color: var(--ink-soft);
+    }
+    .gaps li:last-child { border-bottom: none; }
+    .gaps .arr { color: var(--rule-2); }
+    .gaps .dur {
+      color: var(--reject);
+      font-weight: 500;
+    }
+
+    /* ── colophon ────────────────────────────────────────────────── */
+
+    .colophon {
+      margin-top: clamp(48px, 8vw, 70px);
+      padding-top: 24px;
+      border-top: 1px solid var(--ink-soft);
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink-dim);
+    }
+    .colophon em {
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 400;
+      text-transform: none;
+      letter-spacing: -0.01em;
+      color: var(--ink);
+      font-size: 16px;
+    }
+
+    /* ── load-in ─────────────────────────────────────────────────── */
+
+    .masthead, .lede, .section, .colophon {
+      animation: rise 600ms cubic-bezier(.2,.7,.2,1) backwards;
+    }
+    .lede        { animation-delay: 80ms; }
+    .section:nth-of-type(1) { animation-delay: 160ms; }
+    .section:nth-of-type(2) { animation-delay: 220ms; }
+    .section:nth-of-type(3) { animation-delay: 280ms; }
+    .section:nth-of-type(4) { animation-delay: 340ms; }
+    .colophon    { animation-delay: 400ms; }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.001ms !important;
+      }
+    }
+  </style>
+</head>
+<body class="state-hunting">
+  <main>
+    <header class="masthead">
+      <div class="mast-row">
+        <span>VOL. <b id="vol">I</b></span>
+        <span id="dateline">— —, MMXXVI</span>
+      </div>
+      <h1 class="mast-title">
+        <span class="the">The</span>
+        getOracle Field Log
+      </h1>
+      <div class="mast-meta">
+        <span>OBSV: <b>eu-stockholm-1</b></span>
+        <span>SHAPE: <b>A1.Flex</b></span>
+        <span>UPDATED: <b id="updated">—</b></span>
+      </div>
+      <div class="seal" id="seal"><span>on watch</span></div>
+    </header>
+
+    <section class="lede">
+      <div class="lede-eyebrow"><span id="eyebrow">listening</span></div>
+      <h2 class="lede-title">
+        <span id="lede-line1">Day —.</span>
+        <span class="accent" id="lede-line2">Still no capacity.</span>
+      </h2>
+      <p class="lede-body" id="lede-body">
+        Reading the signal log&hellip;
+      </p>
+
+      <dl class="ruled">
+        <div class="cell">
+          <dt>Signals sent</dt>
+          <dd id="stat-attempts">—</dd>
+        </div>
+        <div class="cell">
+          <dt>On duty</dt>
+          <dd id="stat-watch">—</dd>
+        </div>
+        <div class="cell">
+          <dt>Uptime</dt>
+          <dd id="stat-uptime">—</dd>
+        </div>
+      </dl>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <h2>Signal trace</h2>
+        <span class="section-note" id="trace-note">—</span>
+      </div>
+      <figure class="trace">
+        <svg id="trace-svg" viewBox="0 0 600 180" preserveAspectRatio="none" aria-label="Hourly attempts over time"></svg>
+        <figcaption class="legend">
+          <span id="trace-range">—</span>
+          <span><span style="color:var(--signal-2)">━━</span>  attempts / hr   ·   <span style="color:var(--reject)">▤</span> offline</span>
+        </figcaption>
+      </figure>
+    </section>
+
+    <section class="section">
+      <div class="section-head"><h2>Notes from the log</h2></div>
+      <div class="ledger">
+        <div>
+          <h3>Rejections</h3>
+          <ul class="kv" id="rejections"></ul>
+        </div>
+        <div>
+          <h3>Interruptions</h3>
+          <ul class="kv" id="interruptions"></ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head"><h2>Recent dispatches</h2><span class="section-note">latest first</span></div>
+      <ul class="dispatches" id="log-tail"></ul>
+    </section>
+
+    <section class="section">
+      <div class="section-head"><h2>Offline windows</h2></div>
+      <ul class="gaps" id="gaps"></ul>
+    </section>
+
+    <div class="colophon">
+      <span>set by hand · printed in mono</span>
+      <em>“the watch continues.”</em>
+    </div>
+  </main>
+
+  <script>
+    "use strict";
+
+    const STATS_URL = 'https://asracwl.github.io/getOracle/stats.json';
+
+    function parseUTC(s) {
+      if (!s) return null;
+      const stamp = s.replace(' ', 'T');
+      const d = new Date(/[zZ]|[+-]\d{2}:?\d{2}$/.test(stamp) ? stamp : stamp + 'Z');
+      return isNaN(d) ? null : d;
+    }
+    const fmtDate    = d => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    const fmtClock   = d => d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+    const fmtLongDate = d => d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    const num = n => n.toLocaleString();
+    const fmtDuration = s => {
+      if (!s || s < 0) return '0m';
+      const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
+      return h > 0 ? `${h}h ${m}m` : `${m}m`;
+    };
+    const ordinalWord = n => ['zero','one','two','three','four','five','six','seven','eight','nine',
+                              'ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen',
+                              'seventeen','eighteen','nineteen','twenty'][n] || String(n);
+    const toRoman = num => {
+      const map = [['L',50],['XL',40],['X',10],['IX',9],['V',5],['IV',4],['I',1]];
+      let s = '';
+      for (const [r, v] of map) while (num >= v) { s += r; num -= v; }
+      return s || 'I';
+    };
+
+    function el(t, c, x) { const n = document.createElement(t); if (c) n.className = c; if (x !== undefined) n.textContent = x; return n; }
+
+    function renderHero(stats) {
+      const t = stats.totals;
+      const created = stats.status === 'instance_created';
+      document.body.className = created ? 'state-created' : 'state-hunting';
+
+      const days = Math.max(1, Math.ceil(stats.hunting_duration_seconds / 86400));
+      document.getElementById('vol').textContent = toRoman(days);
+
+      const gen = parseUTC(stats.generated_at) || new Date();
+      document.getElementById('dateline').textContent = fmtLongDate(gen).toUpperCase();
+      document.getElementById('updated').textContent = fmtClock(gen);
+
+      const seal = document.getElementById('seal');
+      const eyebrow = document.getElementById('eyebrow');
+      if (created) {
+        seal.querySelector('span').textContent = 'capacity';
+        eyebrow.textContent = 'capacity acquired';
+        document.getElementById('lede-line1').textContent = 'The watch is over.';
+        document.querySelector('.lede-title .accent').textContent = 'Capacity acquired.';
+        document.getElementById('lede-body').innerHTML =
+          'An instance was provisioned in <strong>eu-stockholm-1</strong>. The <em>INSTANCE_CREATED</em> marker on the host carries its public IP.';
+      } else {
+        seal.querySelector('span').textContent = 'on watch';
+        eyebrow.textContent = 'listening';
+        const word = ordinalWord(days);
+        document.getElementById('lede-line1').textContent = `Day ${word}.`;
+        document.querySelector('.lede-title .accent').textContent = 'Still no capacity.';
+        document.getElementById('lede-body').innerHTML =
+          `In the past <strong>${fmtDuration(stats.hunting_duration_seconds)}</strong>, the watch has sent <strong>${num(t.attempts)}</strong> signals into <em>eu-stockholm-1</em>. None have been answered.`;
+      }
+
+      document.getElementById('stat-attempts').textContent = num(t.attempts);
+      const dh = Math.floor(stats.hunting_duration_seconds / 3600);
+      const dm = Math.floor((stats.hunting_duration_seconds % 3600) / 60);
+      document.getElementById('stat-watch').innerHTML = `${dh}<span class="u">h</span> ${dm}<span class="u">m</span>`;
+      const up = Math.max(0, stats.hunting_duration_seconds - (t.downtime_seconds || 0));
+      const upPct = stats.hunting_duration_seconds > 0 ? (up / stats.hunting_duration_seconds) * 100 : 100;
+      document.getElementById('stat-uptime').innerHTML = `${upPct.toFixed(1)}<span class="u">%</span>`;
+    }
+
+    function renderTrace(stats) {
+      const buckets = stats.timeline || [];
+      const svg = document.getElementById('trace-svg');
+      const note = document.getElementById('trace-note');
+      const rangeEl = document.getElementById('trace-range');
+      if (!buckets.length) { note.textContent = 'no data'; return; }
+
+      const W = 600, H = 180, padL = 16, padR = 8, padT = 14, padB = 22;
+      const peak = Math.max(1, ...buckets.map(b => b.attempts));
+      const n = buckets.length;
+
+      const xAt = i => padL + (i / Math.max(1, n - 1)) * (W - padL - padR);
+      const yAt = v => padT + (1 - v / peak) * (H - padT - padB);
+
+      const ns = 'http://www.w3.org/2000/svg';
+      svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+
+      // graph paper baseline lines
+      const baselines = [0, peak * .25, peak * .5, peak * .75, peak];
+      for (const v of baselines) {
+        const line = document.createElementNS(ns, 'line');
+        line.setAttribute('x1', padL); line.setAttribute('x2', W - padR);
+        line.setAttribute('y1', yAt(v)); line.setAttribute('y2', yAt(v));
+        line.setAttribute('stroke', 'var(--rule)');
+        line.setAttribute('stroke-width', v === 0 ? 1.2 : 0.7);
+        line.setAttribute('stroke-dasharray', v === 0 ? '' : '2 4');
+        svg.appendChild(line);
+
+        const t = document.createElementNS(ns, 'text');
+        t.setAttribute('x', 2);
+        t.setAttribute('y', yAt(v) + 3);
+        t.setAttribute('font-family', 'JetBrains Mono, monospace');
+        t.setAttribute('font-size', '9');
+        t.setAttribute('fill', 'var(--ink-dim)');
+        t.textContent = String(Math.round(v));
+        svg.appendChild(t);
+      }
+
+      // gap shading
+      const gapWindows = (stats.gaps || []).map(g => [parseUTC(g.from), parseUTC(g.to)]).filter(([a, b]) => a && b);
+      for (let i = 0; i < n; i++) {
+        const start = parseUTC(buckets[i].hour);
+        const end = start ? new Date(start.getTime() + 3600000) : null;
+        if (start && gapWindows.some(([a, b]) => a < end && b > start)) {
+          const rect = document.createElementNS(ns, 'rect');
+          rect.setAttribute('x', xAt(i) - 2);
+          rect.setAttribute('y', padT);
+          rect.setAttribute('width', 4);
+          rect.setAttribute('height', H - padT - padB);
+          rect.setAttribute('fill', 'var(--reject)');
+          rect.setAttribute('opacity', '0.18');
+          svg.appendChild(rect);
+        }
+      }
+
+      // area fill
+      const areaPts = buckets.map((b, i) => `${xAt(i).toFixed(1)},${yAt(b.attempts).toFixed(1)}`);
+      const area = document.createElementNS(ns, 'path');
+      area.setAttribute('d',
+        `M ${padL},${yAt(0)} L ${areaPts.join(' L ')} L ${xAt(n - 1)},${yAt(0)} Z`);
+      area.setAttribute('fill', 'var(--signal)');
+      area.setAttribute('opacity', '0.18');
+      svg.appendChild(area);
+
+      // line
+      const line = document.createElementNS(ns, 'polyline');
+      line.setAttribute('points', areaPts.join(' '));
+      line.setAttribute('fill', 'none');
+      line.setAttribute('stroke', 'var(--signal-2)');
+      line.setAttribute('stroke-width', '1.6');
+      line.setAttribute('stroke-linejoin', 'round');
+      line.setAttribute('stroke-linecap', 'round');
+      // animated draw-in
+      const totalLen = areaPts.length * 8;
+      line.setAttribute('stroke-dasharray', totalLen);
+      line.setAttribute('stroke-dashoffset', totalLen);
+      line.style.animation = 'draw 1400ms ease-out 200ms forwards';
+      svg.appendChild(line);
+
+      // day markers along x axis
+      for (let i = 0; i < n; i++) {
+        if (buckets[i].hour.slice(11, 13) !== '00') continue;
+        const d = parseUTC(buckets[i].hour);
+        const t = document.createElementNS(ns, 'text');
+        t.setAttribute('x', xAt(i));
+        t.setAttribute('y', H - 6);
+        t.setAttribute('font-family', 'JetBrains Mono, monospace');
+        t.setAttribute('font-size', '10');
+        t.setAttribute('fill', 'var(--ink-dim)');
+        t.setAttribute('text-anchor', 'middle');
+        t.textContent = fmtDate(d);
+        svg.appendChild(t);
+
+        const tick = document.createElementNS(ns, 'line');
+        tick.setAttribute('x1', xAt(i)); tick.setAttribute('x2', xAt(i));
+        tick.setAttribute('y1', H - padB + 2); tick.setAttribute('y2', H - padB - 2);
+        tick.setAttribute('stroke', 'var(--ink-dim)');
+        tick.setAttribute('stroke-width', '0.8');
+        svg.appendChild(tick);
+      }
+
+      // inject draw keyframes once
+      if (!document.getElementById('draw-kf')) {
+        const st = document.createElement('style');
+        st.id = 'draw-kf';
+        st.textContent = '@keyframes draw { to { stroke-dashoffset: 0; } }';
+        document.head.appendChild(st);
+      }
+
+      const first = parseUTC(buckets[0].hour);
+      const last = parseUTC(buckets[n - 1].hour);
+      rangeEl.textContent = `${fmtDate(first)} → ${fmtDate(last)}`;
+      note.textContent = `${n} hours · peak ${peak}/hr`;
+    }
+
+    function kvRow(code, key, value) {
+      const li = document.createElement('li');
+      if (code) li.appendChild(el('span', `code c${code}`, code));
+      li.appendChild(el('span', 'k', key));
+      const v = el('span', 'v');
+      v.innerHTML = value;
+      li.appendChild(v);
+      return li;
+    }
+
+    function renderTally(stats) {
+      const t = stats.totals;
+      const rej = document.getElementById('rejections');
+      rej.appendChild(kvRow('429', 'rate-limited', num(t.rate_limited_429)));
+      rej.appendChild(kvRow('500', 'out of capacity', num(t.out_of_capacity_500)));
+      if (t.other > 0) rej.appendChild(kvRow(null, 'other responses', num(t.other)));
+
+      const intr = document.getElementById('interruptions');
+      intr.appendChild(kvRow(null, 'offline gaps', num(t.gaps)));
+      const dh = Math.floor(t.downtime_seconds / 3600);
+      const dm = Math.floor((t.downtime_seconds % 3600) / 60);
+      intr.appendChild(kvRow(null, 'total downtime', `${dh}<span class="u">h</span> ${dm}<span class="u">m</span>`));
+      intr.appendChild(kvRow(null, 'connection resets', num(t.crashes)));
+    }
+
+    const LOG_RE = /^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2})\s+(\d+)\s*(.*)$/;
+
+    function renderLog(stats) {
+      const ul = document.getElementById('log-tail');
+      if (!stats.log_tail.length) {
+        ul.appendChild(el('li', 'msg', 'no dispatches yet.'));
+        return;
+      }
+      for (const line of stats.log_tail.slice().reverse()) {
+        const li = document.createElement('li');
+        const m = LOG_RE.exec(line);
+        if (!m) { li.appendChild(el('span', 'msg', line)); ul.appendChild(li); continue; }
+        const [, , clock, status, message] = m;
+        li.appendChild(el('span', 'ts', clock));
+        li.appendChild(el('span', status === '500' ? 'code c500' : 'code', status));
+        li.appendChild(el('span', 'msg', message || '—'));
+        ul.appendChild(li);
+      }
+    }
+
+    function renderGaps(stats) {
+      const ul = document.getElementById('gaps');
+      if (!stats.gaps.length) {
+        ul.appendChild(el('li', null, 'none — the watch has held steady.'));
+        return;
+      }
+      for (const g of stats.gaps.slice().reverse()) {
+        const from = parseUTC(g.from);
+        const to = parseUTC(g.to);
+        const li = document.createElement('li');
+        li.appendChild(el('span', 'ts', from ? `${fmtDate(from)} ${fmtClock(from)}` : g.from));
+        li.appendChild(el('span', 'arr', '→'));
+        const sameDay = from && to && from.toDateString() === to.toDateString();
+        li.appendChild(el('span', null, to ? (sameDay ? fmtClock(to) : `${fmtDate(to)} ${fmtClock(to)}`) : g.to));
+        li.appendChild(el('span', 'dur', fmtDuration(g.duration_seconds)));
+        ul.appendChild(li);
+      }
+    }
+
+    async function main() {
+      try {
+        const res = await fetch(STATS_URL, { cache: 'no-store' });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const stats = await res.json();
+        renderHero(stats);
+        renderTrace(stats);
+        renderTally(stats);
+        renderLog(stats);
+        renderGaps(stats);
+      } catch (err) {
+        console.error(err);
+        document.body.className = 'state-error';
+        document.getElementById('eyebrow').textContent = 'signal lost';
+        document.getElementById('lede-line1').textContent = 'The watch';
+        document.querySelector('.lede-title .accent').textContent = 'is silent.';
+        document.getElementById('lede-body').textContent =
+          'stats.json could not be read. The publisher may be mid-cycle.';
+      }
+    }
+    main();
+  </script>
+</body>
+</html>

@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>getOracle — Almanac · Source Serif</title>
+  <meta name="theme-color" content="#08090d">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Ccircle%20cx='16'%20cy='16'%20r='11'%20fill='none'%20stroke='%23f0a23c'%20stroke-width='2.5'/%3E%3Ccircle%20cx='16'%20cy='16'%20r='4'%20fill='%23f0a23c'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400;1,8..60,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /* getOracle v2 — "Field journal" preview.
+       A more editorial take: serif display + mono data, calendar heatmap
+       in place of the 124-bar timeline (so the chart survives a 320px
+       screen), single-column rhythm that scales to a 720px reading
+       width on desktop. The state-driven --signal var still re-themes
+       the whole page on capacity / error states. */
+
+    :root {
+      --ink:        #08090d;
+      --ink-2:      #0c0e14;
+      --panel:      #11141c;
+      --panel-2:    #161a23;
+      --rule:       #1d2230;
+      --rule-2:     #2a3142;
+      --dim:        #5a6477;
+      --muted:      #8590a3;
+      --text:       #cfd6e2;
+      --bright:     #f6f1e5;
+      --paper:      #e9e0cf;
+
+      --signal:      #f3a83e;
+      --signal-ink:  color-mix(in srgb, var(--signal) 92%, var(--paper));
+      --signal-soft: color-mix(in srgb, var(--signal) 14%, transparent);
+      --signal-line: color-mix(in srgb, var(--signal) 38%, transparent);
+      --signal-glow: color-mix(in srgb, var(--signal) 22%, transparent);
+
+      --reject:    #e07a6d;
+      --cool:      #6c8db5;
+
+      --serif: 'Source Serif 4', 'Iowan Old Style', 'Charter', Georgia, serif;
+      --mono:  'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+      --radius: 6px;
+      --gutter: clamp(20px, 5vw, 44px);
+    }
+
+    body.state-created { --signal: #5fd28e; }
+    body.state-error   { --signal: #df6a6a; }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-text-size-adjust: 100%; }
+
+    body {
+      background: var(--ink);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 14.5px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* ───── atmosphere ──────────────────────────────────────────────── */
+
+    /* a paper-faint grid + a star-field of single pixels.
+       both anchored, both masked toward the top where the eye lives. */
+    body::before {
+      content: "";
+      position: fixed; inset: 0;
+      z-index: -2;
+      pointer-events: none;
+      background:
+        radial-gradient(70% 38% at 50% -6%, var(--signal-glow) 0%, transparent 62%),
+        radial-gradient(120% 60% at 50% 110%, color-mix(in srgb, var(--ink) 60%, #000) 0%, transparent 70%);
+      transition: background 700ms ease;
+    }
+
+    body::after {
+      content: "";
+      position: fixed; inset: 0;
+      z-index: -2;
+      pointer-events: none;
+      background-image:
+        radial-gradient(1px 1px at 10% 18%, #6e7790 50%, transparent 51%),
+        radial-gradient(1px 1px at 80% 8%,  #4a526a 50%, transparent 51%),
+        radial-gradient(1px 1px at 23% 70%, #3a4156 50%, transparent 51%),
+        radial-gradient(1px 1px at 91% 44%, #6e7790 50%, transparent 51%),
+        radial-gradient(1px 1px at 55% 30%, #3a4156 50%, transparent 51%),
+        radial-gradient(1px 1px at 68% 88%, #4a526a 50%, transparent 51%),
+        radial-gradient(1px 1px at 38% 12%, #4a526a 50%, transparent 51%),
+        radial-gradient(1px 1px at 5% 60%,  #3a4156 50%, transparent 51%);
+      background-size: 320px 320px, 460px 460px, 400px 400px, 520px 520px, 360px 360px, 440px 440px, 380px 380px, 500px 500px;
+      opacity: .55;
+      -webkit-mask-image: radial-gradient(120% 70% at 50% 0%, #000 0%, transparent 78%);
+              mask-image: radial-gradient(120% 70% at 50% 0%, #000 0%, transparent 78%);
+    }
+
+    .grain {
+      position: fixed; inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      opacity: 0.05;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    /* ───── frame ───────────────────────────────────────────────────── */
+
+    main {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 0 var(--gutter) clamp(60px, 12vw, 110px);
+    }
+
+    /* ───── masthead ────────────────────────────────────────────────── */
+
+    .masthead {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 22px 0 18px;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .mark {
+      display: flex;
+      align-items: baseline;
+      gap: 9px;
+    }
+    .mark svg {
+      width: 14px; height: 14px;
+      transform: translateY(2px);
+    }
+    .mark .name {
+      font-family: var(--serif);
+      font-size: 19px;
+      font-weight: 600;
+      letter-spacing: -0.015em;
+      color: var(--bright);
+    }
+    .mark .vol {
+      font-family: var(--mono);
+      font-size: 10.5px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--dim);
+      margin-left: 4px;
+    }
+
+    .meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 10.5px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--dim);
+      text-align: right;
+    }
+    .meta .dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--signal);
+      box-shadow: 0 0 0 0 var(--signal-glow);
+      animation: pulse 2.6s ease-out infinite;
+      flex: none;
+    }
+    @keyframes pulse {
+      0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--signal) 50%, transparent); }
+      70%  { box-shadow: 0 0 0 11px transparent; }
+      100% { box-shadow: 0 0 0 0 transparent; }
+    }
+
+    /* ───── hero ────────────────────────────────────────────────────── */
+
+    .hero {
+      padding: clamp(40px, 9vw, 76px) 0 clamp(36px, 8vw, 56px);
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 10.5px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--dim);
+    }
+    .eyebrow .pip {
+      width: 22px; height: 1px;
+      background: var(--signal-line);
+    }
+    .eyebrow .now {
+      color: var(--signal-ink);
+      font-weight: 500;
+    }
+
+    .hero-title {
+      margin-top: 18px;
+      font-family: var(--serif);
+      font-weight: 400;
+      font-size: clamp(46px, 11vw, 92px);
+      line-height: 0.95;
+      letter-spacing: -0.035em;
+      color: var(--bright);
+    }
+    .hero-title .accent {
+      font-style: italic;
+      font-weight: 400;
+      color: var(--signal-ink);
+    }
+
+    .hero-lede {
+      margin-top: clamp(22px, 4vw, 32px);
+      max-width: 56ch;
+      font-family: var(--mono);
+      font-size: 13.5px;
+      line-height: 1.7;
+      color: var(--muted);
+    }
+    .hero-lede strong {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    /* a 4-up editorial stat row that reflows to 2-up on mobile */
+    .stats-row {
+      margin-top: clamp(32px, 6vw, 48px);
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      border-top: 1px solid var(--rule);
+      border-bottom: 1px solid var(--rule);
+    }
+    .stat {
+      padding: 18px 16px 16px 0;
+      border-right: 1px solid var(--rule);
+    }
+    .stat:nth-child(4n) { border-right: none; }
+    .stat:not(:first-child) { padding-left: 16px; }
+
+    .stat dt {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--dim);
+    }
+    .stat dd {
+      margin-top: 6px;
+      font-family: var(--serif);
+      font-size: clamp(24px, 4.6vw, 34px);
+      font-weight: 500;
+      line-height: 1;
+      letter-spacing: -0.015em;
+      color: var(--bright);
+      font-variant-numeric: tabular-nums;
+    }
+    .stat dd .unit {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0.04em;
+      color: var(--dim);
+      margin-left: 3px;
+    }
+
+    /* ───── section heads ───────────────────────────────────────────── */
+
+    section.block { margin-top: clamp(40px, 7vw, 64px); }
+
+    .section-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    .section-head h2 {
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 500;
+      font-size: 20px;
+      letter-spacing: -0.01em;
+      color: var(--bright);
+    }
+    .section-head h2 .num {
+      font-style: normal;
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--signal-ink);
+      margin-right: 10px;
+      vertical-align: 2px;
+    }
+    .section-note {
+      font-family: var(--mono);
+      font-size: 10.5px;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--dim);
+    }
+
+    /* ───── heatmap ─────────────────────────────────────────────────── */
+
+    .heatmap-wrap {
+      padding: 18px 16px 14px;
+      background:
+        linear-gradient(180deg, color-mix(in srgb, var(--panel) 96%, transparent) 0%, var(--panel) 100%);
+      border: 1px solid var(--rule);
+      border-radius: var(--radius);
+    }
+
+    .heatmap {
+      display: grid;
+      grid-template-columns: 38px repeat(24, minmax(0, 1fr));
+      gap: 3px;
+      align-items: center;
+    }
+
+    .hm-hdr {
+      font-family: var(--mono);
+      font-size: 9.5px;
+      letter-spacing: 0.04em;
+      color: var(--dim);
+      text-align: center;
+      padding: 0 0 6px;
+    }
+    .hm-hdr.day {
+      text-align: left;
+      padding-left: 0;
+    }
+    .hm-row-label {
+      font-family: var(--mono);
+      font-size: 10.5px;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      padding-right: 8px;
+    }
+    .hm-row-label .dow {
+      color: var(--dim);
+      font-size: 9.5px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-left: 6px;
+    }
+
+    .hm-cell {
+      position: relative;
+      aspect-ratio: 1 / 1;
+      border-radius: 2px;
+      background: color-mix(in srgb, var(--rule) 75%, transparent);
+      transition: filter 120ms ease, transform 120ms ease;
+    }
+    .hm-cell.lvl-1 { background: color-mix(in srgb, var(--signal) 22%, var(--panel-2)); }
+    .hm-cell.lvl-2 { background: color-mix(in srgb, var(--signal) 42%, var(--panel-2)); }
+    .hm-cell.lvl-3 { background: color-mix(in srgb, var(--signal) 65%, var(--panel-2)); }
+    .hm-cell.lvl-4 { background: var(--signal); box-shadow: 0 0 8px var(--signal-soft); }
+    .hm-cell.gap   {
+      background:
+        repeating-linear-gradient(-45deg,
+          color-mix(in srgb, var(--reject) 22%, transparent) 0 2px,
+          transparent 2px 5px),
+        color-mix(in srgb, var(--rule) 75%, transparent);
+    }
+    .hm-cell.future { background: transparent; }
+    .hm-cell.now {
+      outline: 1px solid var(--signal-ink);
+      outline-offset: 1px;
+    }
+    .hm-cell:hover { filter: brightness(1.25); transform: scale(1.15); z-index: 2; }
+
+    /* tooltip on hover (CSS-only) */
+    .hm-cell[data-label]:hover::after {
+      content: attr(data-label);
+      position: absolute;
+      bottom: calc(100% + 6px);
+      left: 50%;
+      transform: translateX(-50%);
+      white-space: nowrap;
+      padding: 4px 8px;
+      font-family: var(--mono);
+      font-size: 10.5px;
+      color: var(--bright);
+      background: var(--panel-2);
+      border: 1px solid var(--rule-2);
+      border-radius: 3px;
+      box-shadow: 0 6px 18px #0009;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .heatmap-legend {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid var(--rule);
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--dim);
+    }
+    .heatmap-legend .swatches {
+      display: flex;
+      gap: 3px;
+      margin: 0 4px;
+    }
+    .heatmap-legend .sw {
+      width: 14px; height: 14px;
+      border-radius: 2px;
+      background: color-mix(in srgb, var(--rule) 75%, transparent);
+    }
+    .heatmap-legend .sw.l1 { background: color-mix(in srgb, var(--signal) 22%, var(--panel-2)); }
+    .heatmap-legend .sw.l2 { background: color-mix(in srgb, var(--signal) 42%, var(--panel-2)); }
+    .heatmap-legend .sw.l3 { background: color-mix(in srgb, var(--signal) 65%, var(--panel-2)); }
+    .heatmap-legend .sw.l4 { background: var(--signal); }
+    .heatmap-legend .gap-key {
+      margin-left: auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .heatmap-legend .gap-key .sw {
+      background:
+        repeating-linear-gradient(-45deg,
+          color-mix(in srgb, var(--reject) 30%, transparent) 0 2px,
+          transparent 2px 5px),
+        color-mix(in srgb, var(--rule) 75%, transparent);
+    }
+
+    /* ───── grid-two (rejections + interruptions) ───────────────────── */
+
+    .grid-two {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(24px, 4vw, 36px);
+      margin-top: clamp(40px, 7vw, 64px);
+    }
+    .grid-two > .panel { margin-top: 0; }
+
+    .panel {
+      padding: 22px 22px 14px;
+      background: var(--panel);
+      border: 1px solid var(--rule);
+      border-radius: var(--radius);
+    }
+    .panel-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .panel-head h3 {
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 500;
+      font-size: 16px;
+      color: var(--bright);
+    }
+    .panel-head .kicker {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--dim);
+    }
+
+    .kv {
+      list-style: none;
+    }
+    .kv li {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      padding: 11px 0;
+      border-bottom: 1px dashed var(--rule);
+    }
+    .kv li:last-child { border-bottom: none; }
+    .kv .k {
+      font-family: var(--mono);
+      font-size: 10.5px;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--dim);
+      flex: 1;
+    }
+    .kv .v {
+      font-family: var(--serif);
+      font-size: 22px;
+      font-weight: 500;
+      line-height: 1;
+      color: var(--bright);
+      font-variant-numeric: tabular-nums;
+    }
+    .kv .v .unit {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 400;
+      color: var(--dim);
+      margin-left: 3px;
+    }
+    .kv .code {
+      flex: none;
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      padding: 2px 6px;
+      border-radius: 3px;
+      border: 1px solid currentColor;
+    }
+    .kv .code.c429 { color: var(--signal); }
+    .kv .code.c500 { color: var(--reject); }
+
+    /* ───── log + gaps ──────────────────────────────────────────────── */
+
+    .log, .gaps {
+      list-style: none;
+    }
+
+    .log li, .gaps li {
+      display: grid;
+      grid-template-columns: auto auto 1fr auto;
+      align-items: baseline;
+      column-gap: 12px;
+      row-gap: 2px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--rule);
+      font-size: 12.5px;
+    }
+    .log li:last-child, .gaps li:last-child { border-bottom: none; }
+    .log li.empty, .gaps li.empty {
+      color: var(--dim);
+      border-bottom: none;
+      display: block;
+      padding: 14px 0;
+    }
+
+    .ts { color: var(--dim); font-family: var(--mono); }
+    .chip {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      padding: 1px 6px;
+      border-radius: 3px;
+      border: 1px solid currentColor;
+    }
+    .chip-429 { color: var(--signal); }
+    .chip-500 { color: var(--reject); }
+    .chip-other { color: var(--dim); }
+    .msg { color: var(--muted); overflow-wrap: anywhere; }
+
+    .gap-arrow { color: var(--rule-2); }
+    .gap-route { color: var(--text); }
+    .gap-dur {
+      color: var(--reject);
+      font-family: var(--mono);
+      font-size: 11.5px;
+      letter-spacing: 0.03em;
+    }
+
+    /* ───── footer rule ─────────────────────────────────────────────── */
+
+    .colophon {
+      margin-top: clamp(46px, 8vw, 70px);
+      padding-top: 22px;
+      border-top: 1px solid var(--rule);
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      font-family: var(--mono);
+      font-size: 10.5px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--dim);
+    }
+    .colophon em {
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 400;
+      text-transform: none;
+      letter-spacing: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    /* ───── load-in stagger ─────────────────────────────────────────── */
+
+    .masthead, .hero, .block, .colophon {
+      animation: rise 620ms cubic-bezier(.2,.7,.2,1) backwards;
+    }
+    .hero        { animation-delay: 80ms; }
+    .block:nth-of-type(1) { animation-delay: 160ms; }
+    .block:nth-of-type(2) { animation-delay: 220ms; }
+    .block:nth-of-type(3) { animation-delay: 280ms; }
+    .block:nth-of-type(4) { animation-delay: 320ms; }
+    .colophon    { animation-delay: 360ms; }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ───── mobile ──────────────────────────────────────────────────── */
+
+    @media (max-width: 640px) {
+      .masthead {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+      .meta { text-align: left; flex-wrap: wrap; }
+
+      .stats-row { grid-template-columns: 1fr 1fr; }
+      .stat { border-right: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+      .stat:nth-child(2n) { border-right: none; }
+      .stat:nth-last-child(-n+2) { border-bottom: none; }
+
+      .grid-two { grid-template-columns: 1fr; gap: 20px; }
+
+      .heatmap { grid-template-columns: 28px repeat(24, minmax(0, 1fr)); gap: 2px; }
+      .hm-row-label { font-size: 9.5px; padding-right: 5px; }
+      .hm-row-label .dow { display: none; }
+      .hm-hdr { font-size: 8.5px; }
+      /* show every 3rd hour label on mobile */
+      .hm-hdr.h-1, .hm-hdr.h-2, .hm-hdr.h-4, .hm-hdr.h-5,
+      .hm-hdr.h-7, .hm-hdr.h-8, .hm-hdr.h-10, .hm-hdr.h-11,
+      .hm-hdr.h-13, .hm-hdr.h-14, .hm-hdr.h-16, .hm-hdr.h-17,
+      .hm-hdr.h-19, .hm-hdr.h-20, .hm-hdr.h-22, .hm-hdr.h-23 {
+        visibility: hidden;
+      }
+
+      .log li, .gaps li {
+        grid-template-columns: auto 1fr;
+        column-gap: 10px;
+      }
+      .log li .chip { grid-row: 1; grid-column: 2 / 3; justify-self: end; }
+      .log li .ts { grid-row: 1; grid-column: 1 / 2; }
+      .log li .msg { grid-row: 2; grid-column: 1 / 3; font-size: 12px; }
+
+      .gaps li .gap-arrow { display: none; }
+      .gaps li .ts  { grid-row: 1; grid-column: 1 / 2; }
+      .gaps li .gap-dur { grid-row: 1; grid-column: 2 / 3; justify-self: end; }
+      .gaps li .gap-route { grid-row: 2; grid-column: 1 / 3; color: var(--muted); font-size: 12px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+      }
+    }
+  </style>
+</head>
+<body class="state-hunting">
+  <div class="grain" aria-hidden="true"></div>
+
+  <main>
+    <header class="masthead">
+      <div class="mark">
+        <svg viewBox="0 0 32 32" aria-hidden="true">
+          <circle cx="16" cy="16" r="12" fill="none" stroke="var(--signal)" stroke-width="2"/>
+          <circle cx="16" cy="16" r="4"  fill="var(--signal)"/>
+        </svg>
+        <span class="name">getOracle</span>
+        <span class="vol" id="vol">Vol. —</span>
+      </div>
+      <div class="meta">
+        <span>eu-stockholm-1 · A1.Flex</span>
+        <span class="dot" aria-hidden="true"></span>
+        <span id="updated">—</span>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="eyebrow">
+        <span class="pip" aria-hidden="true"></span>
+        <span>The watch is</span>
+        <span class="now" id="eyebrow-state">listening…</span>
+      </div>
+
+      <h1 class="hero-title">
+        <span id="hero-day">Day —</span>
+        <br>
+        <span class="accent">of the watch.</span>
+      </h1>
+
+      <p class="hero-lede" id="hero-lede">
+        Reading the signal log…
+      </p>
+
+      <dl class="stats-row">
+        <div class="stat">
+          <dt>Signals sent</dt>
+          <dd id="stat-attempts">—</dd>
+        </div>
+        <div class="stat">
+          <dt>On duty</dt>
+          <dd id="stat-watch">—</dd>
+        </div>
+        <div class="stat">
+          <dt>Avg / hour</dt>
+          <dd id="stat-rate">—</dd>
+        </div>
+        <div class="stat">
+          <dt>Uptime</dt>
+          <dd id="stat-uptime">—</dd>
+        </div>
+      </dl>
+    </section>
+
+    <section class="block">
+      <div class="section-head">
+        <h2><span class="num">I</span>Signal almanac</h2>
+        <span class="section-note" id="heatmap-note">—</span>
+      </div>
+      <div class="heatmap-wrap">
+        <div class="heatmap" id="heatmap" role="img" aria-label="Hourly attempt heatmap"></div>
+        <div class="heatmap-legend">
+          <span>quiet</span>
+          <span class="swatches">
+            <span class="sw"></span>
+            <span class="sw l1"></span>
+            <span class="sw l2"></span>
+            <span class="sw l3"></span>
+            <span class="sw l4"></span>
+          </span>
+          <span>active</span>
+          <span class="gap-key">
+            <span class="sw"></span>
+            <span>offline gap</span>
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="section-head">
+        <h2><span class="num">II</span>Tally</h2>
+      </div>
+      <div class="grid-two">
+        <article class="panel">
+          <div class="panel-head"><h3>Rejections</h3><span class="kicker">why we wait</span></div>
+          <ul class="kv" id="rejections"></ul>
+        </article>
+        <article class="panel">
+          <div class="panel-head"><h3>Interruptions</h3><span class="kicker">when we slept</span></div>
+          <ul class="kv" id="interruptions"></ul>
+        </article>
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="section-head">
+        <h2><span class="num">III</span>Recent signals</h2>
+        <span class="section-note">latest first</span>
+      </div>
+      <div class="panel">
+        <ul class="log" id="log-tail"></ul>
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="section-head">
+        <h2><span class="num">IV</span>Offline gaps</h2>
+      </div>
+      <div class="panel">
+        <ul class="gaps" id="gaps"></ul>
+      </div>
+    </section>
+
+    <div class="colophon">
+      <span>logbook · v2 preview</span>
+      <em>“and so the watch resumes.”</em>
+    </div>
+  </main>
+
+  <script>
+    "use strict";
+
+    /* preview build of the getOracle dashboard. fetches the live stats.json
+       (absolute URL when opened from file://) so the file works whether you
+       open it in-place or behind a local http server. */
+
+    const STATS_URL = 'https://asracwl.github.io/getOracle/stats.json';
+
+    const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    /* ── helpers ─────────────────────────────────────────────────── */
+
+    function parseUTC(s) {
+      if (!s) return null;
+      const stamp = s.replace(' ', 'T');
+      const d = new Date(/[zZ]|[+-]\d{2}:?\d{2}$/.test(stamp) ? stamp : stamp + 'Z');
+      return isNaN(d) ? null : d;
+    }
+    const fmtDate  = d => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    const fmtClock = d => d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+    const fmtStamp = d => d ? `${fmtDate(d)}, ${fmtClock(d)}` : '—';
+    const fmtDow   = d => d.toLocaleDateString('en-US', { weekday: 'short' });
+
+    function fmtDuration(seconds) {
+      if (!seconds || seconds < 0) return '0m';
+      const h = Math.floor(seconds / 3600);
+      const m = Math.floor((seconds % 3600) / 60);
+      return h > 0 ? `${h}h ${m}m` : `${m}m`;
+    }
+
+    function relTime(d) {
+      if (!d) return '—';
+      const s = Math.max(0, Math.floor((Date.now() - d.getTime()) / 1000));
+      if (s < 60) return `${s}s ago`;
+      const m = Math.floor(s / 60);
+      if (m < 60) return `${m}m ago`;
+      const h = Math.floor(m / 60);
+      return `${h}h ${m % 60}m ago`;
+    }
+
+    function ordinal(n) {
+      const words = ['zero','one','two','three','four','five','six','seven','eight','nine','ten',
+                     'eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen',
+                     'eighteen','nineteen','twenty'];
+      return words[n] || String(n);
+    }
+
+    function el(tag, className, text) {
+      const node = document.createElement(tag);
+      if (className) node.className = className;
+      if (text !== undefined) node.textContent = text;
+      return node;
+    }
+
+    function countUp(node, target, format) {
+      if (REDUCED || !(target > 0)) { node.innerHTML = format(target); return; }
+      const dur = 900;
+      const start = performance.now();
+      (function frame(now) {
+        const t = Math.min(1, (now - start) / dur);
+        const eased = 1 - Math.pow(1 - t, 3);
+        node.innerHTML = format(target * eased);
+        if (t < 1) requestAnimationFrame(frame);
+      })(performance.now());
+    }
+
+    /* ── hero ────────────────────────────────────────────────────── */
+
+    let lastAttemptDate = null;
+
+    function renderHero(stats) {
+      const created = stats.status === 'instance_created';
+      document.body.className = created ? 'state-created' : 'state-hunting';
+
+      const eyebrow = document.getElementById('eyebrow-state');
+      const dayWord = document.getElementById('hero-day');
+      const lede    = document.getElementById('hero-lede');
+
+      const watchDays = Math.max(1, Math.ceil(stats.hunting_duration_seconds / 86400));
+
+      if (created) {
+        eyebrow.textContent = 'over.';
+        dayWord.textContent = 'Capacity';
+        document.querySelector('.hero-title .accent').textContent = 'acquired.';
+        lede.innerHTML = 'An instance was provisioned. Check the <strong>INSTANCE_CREATED</strong> marker on the host for its public IP, then SSH in with your private key.';
+      } else {
+        eyebrow.textContent = 'listening…';
+        const ord = ordinal(watchDays);
+        dayWord.textContent = `Day ${ord.charAt(0).toUpperCase() + ord.slice(1)}`;
+        lede.innerHTML = `No free ARM capacity in <strong>eu-stockholm-1</strong> yet. The watch retries on a 60-second cadence and stops the moment Oracle opens a slot.`;
+      }
+
+      const t = stats.totals;
+      const attemptsEl = document.getElementById('stat-attempts');
+      const watchEl    = document.getElementById('stat-watch');
+      const rateEl     = document.getElementById('stat-rate');
+      const uptimeEl   = document.getElementById('stat-uptime');
+
+      countUp(attemptsEl, t.attempts, v => Math.round(v).toLocaleString());
+      countUp(watchEl, stats.hunting_duration_seconds, v => {
+        const h = Math.floor(v / 3600);
+        const m = Math.floor((v % 3600) / 60);
+        return `${h}<span class="unit">h</span> ${m}<span class="unit">m</span>`;
+      });
+
+      const perHour = stats.hunting_duration_seconds > 0
+        ? Math.round(t.attempts / (stats.hunting_duration_seconds / 3600))
+        : 0;
+      countUp(rateEl, perHour, v => Math.round(v).toString());
+
+      const total = stats.hunting_duration_seconds;
+      const up = Math.max(0, total - (t.downtime_seconds || 0));
+      const uptimePct = total > 0 ? (up / total) * 100 : 100;
+      countUp(uptimeEl, uptimePct, v => `${v.toFixed(1)}<span class="unit">%</span>`);
+
+      lastAttemptDate = parseUTC(stats.last_attempt);
+      document.getElementById('vol').textContent = `Vol. ${toRoman(watchDays)}`;
+    }
+
+    function toRoman(num) {
+      const map = [['X',10],['IX',9],['V',5],['IV',4],['I',1]];
+      let s = '';
+      for (const [r, v] of map) while (num >= v) { s += r; num -= v; }
+      return s || 'I';
+    }
+
+    /* ── heatmap ─────────────────────────────────────────────────── */
+
+    function renderHeatmap(stats) {
+      const buckets = stats.timeline || [];
+      const note = document.getElementById('heatmap-note');
+      const grid = document.getElementById('heatmap');
+
+      if (!buckets.length) {
+        note.textContent = 'no signals yet';
+        return;
+      }
+
+      // index buckets by ISO date string and hour
+      const byKey = new Map();
+      let peak = 0;
+      for (const b of buckets) {
+        byKey.set(b.hour, b.attempts);
+        if (b.attempts > peak) peak = b.attempts;
+      }
+
+      // collect the unique day list, sorted oldest → newest
+      const dayKeys = Array.from(new Set(buckets.map(b => b.hour.slice(0, 10)))).sort();
+      // limit to the last 7 days for visual density
+      const days = dayKeys.slice(-7);
+
+      // gap windows for shading
+      const gapWindows = (stats.gaps || [])
+        .map(g => [parseUTC(g.from), parseUTC(g.to)])
+        .filter(([a, b]) => a && b);
+
+      // current hour boundary
+      const now = parseUTC(stats.generated_at) || new Date();
+
+      // header row: blank corner + 0..23
+      grid.appendChild(el('div', 'hm-hdr day', ''));
+      for (let h = 0; h < 24; h++) {
+        const hdr = el('div', `hm-hdr h-${h}`, h.toString().padStart(2, '0'));
+        grid.appendChild(hdr);
+      }
+
+      // one row per day
+      for (const dayKey of days) {
+        const dayDate = parseUTC(dayKey + 'T00:00:00');
+        const label = el('div', 'hm-row-label');
+        label.appendChild(document.createTextNode(fmtDate(dayDate)));
+        const dow = el('span', 'dow', fmtDow(dayDate));
+        label.appendChild(dow);
+        grid.appendChild(label);
+
+        for (let h = 0; h < 24; h++) {
+          const hourKey = `${dayKey}T${h.toString().padStart(2, '0')}:00`;
+          const attempts = byKey.has(hourKey) ? byKey.get(hourKey) : null;
+          const hourStart = parseUTC(hourKey);
+          const hourEnd = new Date(hourStart.getTime() + 3600 * 1000);
+
+          const cell = el('div', 'hm-cell');
+
+          // future hour
+          if (hourStart > now) {
+            cell.classList.add('future');
+            grid.appendChild(cell);
+            continue;
+          }
+
+          // gap overlap
+          const inGap = gapWindows.some(([a, b]) => a < hourEnd && b > hourStart);
+          if (inGap && (attempts == null || attempts < 5)) {
+            cell.classList.add('gap');
+          } else if (attempts != null) {
+            // quantize to 4 levels relative to peak
+            const ratio = peak > 0 ? attempts / peak : 0;
+            let lvl = 0;
+            if (ratio > 0.0)  lvl = 1;
+            if (ratio > 0.25) lvl = 2;
+            if (ratio > 0.5)  lvl = 3;
+            if (ratio > 0.85) lvl = 4;
+            if (lvl > 0) cell.classList.add(`lvl-${lvl}`);
+          }
+
+          // mark current hour
+          if (now >= hourStart && now < hourEnd) cell.classList.add('now');
+
+          const dispAttempts = attempts != null ? attempts : 0;
+          cell.dataset.label = `${fmtDate(hourStart)} · ${h.toString().padStart(2, '0')}:00 — ${dispAttempts}${inGap ? ' (offline)' : ''}`;
+          grid.appendChild(cell);
+        }
+      }
+
+      note.textContent = `${days.length} days · peak ${peak}/hr`;
+    }
+
+    /* ── tally lists ─────────────────────────────────────────────── */
+
+    function kvRow(key, value, opts = {}) {
+      const li = document.createElement('li');
+      const k = el('span', 'k', key);
+      li.appendChild(k);
+      if (opts.code) li.appendChild(el('span', `code c${opts.code}`, opts.code));
+      const v = el('span', 'v');
+      v.innerHTML = value;
+      li.appendChild(v);
+      return li;
+    }
+
+    function renderTally(stats) {
+      const t = stats.totals;
+      const rej = document.getElementById('rejections');
+      rej.appendChild(kvRow('rate-limited', t.rate_limited_429.toLocaleString(), { code: '429' }));
+      rej.appendChild(kvRow('out of capacity', t.out_of_capacity_500.toLocaleString(), { code: '500' }));
+      if (t.other > 0) rej.appendChild(kvRow('other responses', t.other.toLocaleString()));
+
+      const intr = document.getElementById('interruptions');
+      intr.appendChild(kvRow('offline gaps', t.gaps.toLocaleString()));
+      const downH = Math.floor(t.downtime_seconds / 3600);
+      const downM = Math.floor((t.downtime_seconds % 3600) / 60);
+      intr.appendChild(kvRow('total downtime', `${downH}<span class="unit">h</span> ${downM}<span class="unit">m</span>`));
+      intr.appendChild(kvRow('connection resets', t.crashes.toLocaleString()));
+    }
+
+    /* ── log + gaps ──────────────────────────────────────────────── */
+
+    const LOG_RE = /^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2})\s+(\d+)\s*(.*)$/;
+
+    function renderLog(stats) {
+      const container = document.getElementById('log-tail');
+      if (!stats.log_tail.length) {
+        container.appendChild(el('li', 'empty', 'no attempts logged yet'));
+        return;
+      }
+      for (const line of stats.log_tail.slice().reverse()) {
+        const li = document.createElement('li');
+        const m = LOG_RE.exec(line);
+        if (!m) {
+          li.appendChild(el('span', 'msg', line));
+          container.appendChild(li);
+          continue;
+        }
+        const [, , clock, status, message] = m;
+        const cls = status === '429' ? 'chip chip-429'
+                  : status === '500' ? 'chip chip-500'
+                  : 'chip chip-other';
+        li.appendChild(el('span', 'ts', clock));
+        li.appendChild(el('span', cls, status));
+        li.appendChild(el('span', 'msg', message || '—'));
+        container.appendChild(li);
+      }
+    }
+
+    function renderGaps(stats) {
+      const container = document.getElementById('gaps');
+      if (!stats.gaps.length) {
+        container.appendChild(el('li', 'empty', 'none — the watch has held steady'));
+        return;
+      }
+      for (const gap of stats.gaps.slice().reverse()) {
+        const from = parseUTC(gap.from);
+        const to = parseUTC(gap.to);
+        const li = document.createElement('li');
+        li.appendChild(el('span', 'ts', from ? fmtStamp(from) : gap.from));
+        li.appendChild(el('span', 'gap-arrow', '→'));
+        const sameDay = from && to && from.toDateString() === to.toDateString();
+        li.appendChild(el('span', 'gap-route',
+          to ? (sameDay ? fmtClock(to) : fmtStamp(to)) : gap.to));
+        li.appendChild(el('span', 'gap-dur', fmtDuration(gap.duration_seconds)));
+        container.appendChild(li);
+      }
+    }
+
+    /* ── boot ────────────────────────────────────────────────────── */
+
+    async function main() {
+      try {
+        const res = await fetch(STATS_URL, { cache: 'no-store' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const stats = await res.json();
+        if (!stats || !stats.totals || !Array.isArray(stats.timeline) ||
+            !Array.isArray(stats.gaps) || !Array.isArray(stats.log_tail)) {
+          throw new Error('stats.json shape mismatch');
+        }
+        renderHero(stats);
+        renderHeatmap(stats);
+        renderTally(stats);
+        renderLog(stats);
+        renderGaps(stats);
+        const gen = parseUTC(stats.generated_at);
+        document.getElementById('updated').textContent =
+          gen ? `updated ${fmtClock(gen)}` : 'updated —';
+      } catch (err) {
+        console.error('dashboard fetch failed:', err);
+        document.body.className = 'state-error';
+        document.getElementById('eyebrow-state').textContent = 'lost.';
+        document.getElementById('hero-day').textContent = 'Signal';
+        document.querySelector('.hero-title .accent').textContent = 'dropped.';
+        document.getElementById('hero-lede').textContent =
+          'stats.json could not be loaded. If you opened this file directly, browsers may block file:// fetches — try `python3 -m http.server` from the dashboard/ folder.';
+      }
+    }
+
+    main();
+  </script>
+</body>
+</html>

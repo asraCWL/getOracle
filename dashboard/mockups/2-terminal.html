@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>getOracle — TERMINAL mockup</title>
+  <meta name="theme-color" content="#040806">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    /* getOracle v2 — TERMINAL mockup.
+       A phosphor-green CRT console. All-mono throughout, VT323 for big
+       chrome and JetBrains Mono for dense data so the small print stays
+       legible. Scanlines + chromatic bloom evoke an old terminal without
+       getting in the way. Chart is a Unicode-block sparkline grid that
+       holds up on any width down to 320px. */
+
+    :root {
+      --bg:        #040806;
+      --bg-2:      #07110b;
+      --panel:     #0a1a10;
+      --rule:      #0e2818;
+      --rule-2:    #154528;
+      --dim:       #2e6e44;
+      --muted:     #4ea868;
+      --green:     #6cff8a;
+      --green-2:   #a4ff88;
+      --bright:    #d6ffd6;
+      --amber:     #f0c64a;
+      --red:       #ff6664;
+      --signal:    var(--green);
+
+      --display: 'VT323', ui-monospace, Menlo, monospace;
+      --data:    'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+      --gutter: clamp(16px, 4vw, 36px);
+    }
+
+    body.state-created { --signal: var(--green); }
+    body.state-error   { --signal: var(--red); }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-text-size-adjust: 100%; }
+
+    body {
+      background: var(--bg);
+      color: var(--green);
+      font-family: var(--data);
+      font-size: 13px;
+      line-height: 1.55;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+      text-shadow: 0 0 8px color-mix(in srgb, var(--green) 35%, transparent);
+    }
+
+    /* CRT atmosphere: scanlines + curved vignette */
+    body::before {
+      content: "";
+      position: fixed; inset: 0;
+      z-index: 100;
+      pointer-events: none;
+      background:
+        repeating-linear-gradient(
+          180deg,
+          rgba(0,0,0,0)    0px,
+          rgba(0,0,0,0)    2px,
+          rgba(0,0,0,.18)  3px,
+          rgba(0,0,0,0)    4px
+        );
+      mix-blend-mode: multiply;
+    }
+    body::after {
+      content: "";
+      position: fixed; inset: 0;
+      z-index: 99;
+      pointer-events: none;
+      background:
+        radial-gradient(140% 90% at 50% 50%, transparent 55%, rgba(0,0,0,.55) 100%);
+    }
+
+    /* phosphor bloom layer */
+    .bloom {
+      position: fixed; inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      background:
+        radial-gradient(60% 35% at 50% 0%, color-mix(in srgb, var(--green) 12%, transparent) 0%, transparent 65%);
+    }
+
+    main {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: clamp(20px, 4vw, 36px) var(--gutter) clamp(60px, 12vw, 110px);
+    }
+
+    /* ── top bar ─────────────────────────────────────────────────── */
+
+    .top {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px 18px;
+      padding-bottom: 10px;
+      border-bottom: 1px dashed var(--rule-2);
+      font-family: var(--data);
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .top .id {
+      font-family: var(--display);
+      font-size: 26px;
+      letter-spacing: 0.01em;
+      text-transform: none;
+      color: var(--bright);
+      line-height: 1;
+    }
+    .top .id b { color: var(--green-2); }
+    .top .link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .top .link .ind {
+      width: 7px; height: 7px;
+      background: var(--signal);
+      border-radius: 50%;
+      box-shadow:
+        0 0 8px var(--signal),
+        0 0 16px color-mix(in srgb, var(--signal) 60%, transparent);
+      animation: blink 1.4s steps(1) infinite;
+    }
+    @keyframes blink {
+      0%, 60%   { opacity: 1; }
+      61%, 100% { opacity: .25; }
+    }
+
+    /* ── prompts + headline ──────────────────────────────────────── */
+
+    .session {
+      margin-top: clamp(18px, 4vw, 30px);
+      font-family: var(--data);
+      font-size: 12.5px;
+    }
+
+    .prompt {
+      color: var(--green-2);
+      letter-spacing: 0.02em;
+    }
+    .prompt::before {
+      content: "PS1> ";
+      color: var(--dim);
+    }
+
+    .panel {
+      margin-top: 14px;
+      padding: 14px 16px 12px;
+      background: var(--bg-2);
+      border: 1px solid var(--rule-2);
+      border-radius: 2px;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,.4);
+    }
+
+    .panel-title {
+      font-family: var(--display);
+      font-size: 22px;
+      line-height: 1;
+      color: var(--bright);
+      margin-bottom: 10px;
+      letter-spacing: 0.02em;
+    }
+    .panel-title .br { color: var(--dim); }
+
+    /* hero status */
+    .status-grid {
+      display: grid;
+      grid-template-columns: 130px 1fr;
+      gap: 4px 14px;
+      font-size: 13.5px;
+    }
+    .status-grid dt {
+      color: var(--dim);
+      letter-spacing: 0.04em;
+    }
+    .status-grid dt::after {
+      content: " ......................................";
+      color: var(--rule-2);
+      letter-spacing: 0;
+    }
+    .status-grid dd {
+      color: var(--green-2);
+      font-weight: 500;
+    }
+    .status-grid dd.hot { color: var(--bright); }
+    .status-grid dd.warn { color: var(--amber); }
+
+    .ascii-headline {
+      margin-top: 16px;
+      font-family: var(--display);
+      font-size: clamp(34px, 9vw, 64px);
+      line-height: 0.95;
+      letter-spacing: 0.02em;
+      color: var(--bright);
+      text-shadow:
+        0 0 4px var(--signal),
+        0 0 12px color-mix(in srgb, var(--signal) 70%, transparent),
+        0 0 24px color-mix(in srgb, var(--signal) 40%, transparent);
+    }
+    .ascii-headline .sub {
+      display: block;
+      margin-top: 6px;
+      font-size: 18px;
+      color: var(--muted);
+      text-shadow: 0 0 4px color-mix(in srgb, var(--green) 25%, transparent);
+    }
+
+    .blurb {
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 12.5px;
+    }
+    .blurb b { color: var(--bright); font-weight: 500; }
+
+    /* ── chart ───────────────────────────────────────────────────── */
+
+    .chart {
+      margin-top: 2px;
+      font-family: var(--data);
+      font-size: 14px;
+      line-height: 1.5;
+      letter-spacing: 0.02em;
+      white-space: pre;
+      overflow-x: auto;
+      color: var(--green-2);
+    }
+    .chart .row { display: flex; gap: 0; align-items: baseline; }
+    .chart .row-label {
+      flex: none;
+      width: 7ch;
+      color: var(--dim);
+      font-size: 11.5px;
+    }
+    .chart .row-bars {
+      flex: 1;
+      font-family: var(--data);
+      font-size: clamp(14px, 4.2vw, 18px);
+      letter-spacing: 0.04em;
+      line-height: 1;
+      color: var(--green);
+      text-shadow:
+        0 0 6px var(--signal),
+        0 0 14px color-mix(in srgb, var(--signal) 50%, transparent);
+    }
+    .chart .row-bars .gap { color: var(--red); opacity: .65; }
+    .chart .row-bars .future { color: var(--rule-2); }
+    .chart .x-axis {
+      margin-top: 6px;
+      padding-left: 7ch;
+      font-size: 11px;
+      color: var(--dim);
+      display: flex;
+      gap: 0;
+    }
+    .chart .x-axis span { flex: 1; }
+
+    .legend {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px dashed var(--rule-2);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--dim);
+    }
+    .legend .ramp {
+      font-family: var(--data);
+      font-size: 16px;
+      color: var(--green);
+      text-shadow: 0 0 6px var(--signal);
+      letter-spacing: 0.06em;
+    }
+
+    /* ── tally + lists ───────────────────────────────────────────── */
+
+    .grid-two {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    .tbl {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .tbl th, .tbl td {
+      padding: 4px 0;
+      text-align: left;
+      vertical-align: baseline;
+    }
+    .tbl th {
+      font-weight: 400;
+      color: var(--dim);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      font-size: 10.5px;
+      padding-bottom: 8px;
+      border-bottom: 1px dashed var(--rule-2);
+    }
+    .tbl td.lbl { color: var(--muted); }
+    .tbl td.val {
+      color: var(--bright);
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+      font-weight: 500;
+    }
+    .tbl td.code {
+      width: 4ch;
+      color: var(--amber);
+      letter-spacing: 0.04em;
+    }
+    .tbl td.code.c500 { color: var(--red); }
+
+    .log {
+      list-style: none;
+      font-size: 12.5px;
+      line-height: 1.7;
+    }
+    .log li {
+      display: grid;
+      grid-template-columns: 8ch 5ch 1fr;
+      align-items: baseline;
+      gap: 10px;
+      padding: 1px 0;
+      color: var(--muted);
+    }
+    .log li .ts { color: var(--dim); }
+    .log li .code { color: var(--amber); letter-spacing: 0.04em; }
+    .log li .code.c500 { color: var(--red); }
+    .log li .msg { color: var(--green-2); overflow-wrap: anywhere; }
+
+    .gaps {
+      list-style: none;
+      font-size: 12.5px;
+    }
+    .gaps li {
+      display: grid;
+      grid-template-columns: auto auto 1fr auto;
+      gap: 8px;
+      padding: 3px 0;
+      border-bottom: 1px dashed var(--rule-2);
+    }
+    .gaps li:last-child { border-bottom: none; }
+    .gaps li .ts { color: var(--dim); }
+    .gaps li .arr { color: var(--rule-2); }
+    .gaps li .rt  { color: var(--muted); overflow-wrap: anywhere; }
+    .gaps li .dur { color: var(--red); }
+
+    /* the prompt + blinking cursor at the bottom */
+    .cursor {
+      margin-top: 20px;
+      font-family: var(--data);
+      font-size: 14px;
+      color: var(--green-2);
+    }
+    .cursor::before {
+      content: "PS1> ";
+      color: var(--dim);
+    }
+    .cursor::after {
+      content: "█";
+      display: inline-block;
+      margin-left: 2px;
+      animation: caret 1.05s steps(1) infinite;
+      color: var(--green);
+    }
+    @keyframes caret {
+      0%, 50%   { opacity: 1; }
+      51%, 100% { opacity: 0; }
+    }
+
+    /* load-in: a typewriter-style cascade */
+    .session > * {
+      animation: tt 380ms ease-out backwards;
+    }
+    .session > *:nth-child(1) { animation-delay: 0ms; }
+    .session > *:nth-child(2) { animation-delay: 60ms; }
+    .session > *:nth-child(3) { animation-delay: 120ms; }
+    .session > *:nth-child(4) { animation-delay: 180ms; }
+    .session > *:nth-child(5) { animation-delay: 240ms; }
+    .session > *:nth-child(6) { animation-delay: 300ms; }
+    .session > *:nth-child(7) { animation-delay: 360ms; }
+    .session > *:nth-child(8) { animation-delay: 420ms; }
+    .session > *:nth-child(9) { animation-delay: 480ms; }
+    .session > *:nth-child(10){ animation-delay: 540ms; }
+    @keyframes tt {
+      from { opacity: 0; transform: translateY(4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 560px) {
+      .grid-two { grid-template-columns: 1fr; }
+      .status-grid { grid-template-columns: 110px 1fr; font-size: 12.5px; }
+      .ascii-headline { font-size: clamp(32px, 11vw, 52px); }
+      .ascii-headline .sub { font-size: 16px; }
+      .log li {
+        grid-template-columns: 8ch 5ch;
+        row-gap: 2px;
+      }
+      .log li .msg {
+        grid-row: 2;
+        grid-column: 1 / -1;
+        padding-left: 0;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+      }
+      .cursor::after { animation: none; opacity: 1; }
+    }
+  </style>
+</head>
+<body class="state-hunting">
+  <div class="bloom" aria-hidden="true"></div>
+
+  <main>
+    <header class="top">
+      <div class="id"><b>get</b>oracle.watch</div>
+      <div class="meta">eu-stockholm-1 · A1.Flex · <span id="updated">--:--Z</span></div>
+      <div class="link"><span class="ind" aria-hidden="true"></span>uplink: <span id="uplink-state">live</span></div>
+    </header>
+
+    <div class="session">
+      <p class="prompt">get-status --verbose</p>
+      <section class="panel">
+        <dl class="status-grid">
+          <dt>STATUS</dt>          <dd class="hot" id="s-status">--</dd>
+          <dt>REGION</dt>          <dd>eu-stockholm-1</dd>
+          <dt>SHAPE</dt>           <dd>VM.Standard.A1.Flex</dd>
+          <dt>UPTIME</dt>          <dd id="s-uptime">--</dd>
+          <dt>ATTEMPTS</dt>        <dd id="s-attempts">--</dd>
+          <dt>AVG / HR</dt>        <dd id="s-rate">--</dd>
+          <dt>LAST_SIG</dt>        <dd id="s-last">--</dd>
+          <dt>DOWNTIME</dt>        <dd class="warn" id="s-down">--</dd>
+        </dl>
+
+        <div class="ascii-headline">
+          <span id="hl-main">[ HUNTING ]</span>
+          <span class="sub" id="hl-sub">day --</span>
+        </div>
+
+        <p class="blurb" id="blurb">
+          Reading the signal log&hellip;
+        </p>
+      </section>
+
+      <p class="prompt">plot attempts --since 5d --grid hour</p>
+      <section class="panel">
+        <p class="panel-title">SIGNAL TRACE <span class="br">// hourly intensity</span></p>
+        <div class="chart" id="chart" aria-label="Hourly attempt sparkline grid"></div>
+        <div class="legend">
+          <span>RAMP</span>
+          <span class="ramp">_ ▁ ▂ ▃ ▄ ▅ ▆ ▇ █</span>
+          <span>RED = OFFLINE</span>
+        </div>
+      </section>
+
+      <p class="prompt">tally rejections,interruptions</p>
+      <section class="panel">
+        <div class="grid-two">
+          <table class="tbl">
+            <thead><tr><th colspan="3">REJECTIONS</th></tr></thead>
+            <tbody id="tbl-rej"></tbody>
+          </table>
+          <table class="tbl">
+            <thead><tr><th colspan="2">INTERRUPTIONS</th></tr></thead>
+            <tbody id="tbl-intr"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <p class="prompt">tail -n 20 capacity.log</p>
+      <section class="panel">
+        <ul class="log" id="log-tail"></ul>
+      </section>
+
+      <p class="prompt">gaps --list</p>
+      <section class="panel">
+        <ul class="gaps" id="gaps"></ul>
+      </section>
+
+      <p class="cursor"></p>
+    </div>
+  </main>
+
+  <script>
+    "use strict";
+
+    const STATS_URL = 'https://asracwl.github.io/getOracle/stats.json';
+    const RAMP = [' ', '▁', '▂', '▃', '▄', '▅', '▆', '▇', '█'];
+
+    function parseUTC(s) {
+      if (!s) return null;
+      const stamp = s.replace(' ', 'T');
+      const d = new Date(/[zZ]|[+-]\d{2}:?\d{2}$/.test(stamp) ? stamp : stamp + 'Z');
+      return isNaN(d) ? null : d;
+    }
+    const fmtDate  = d => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    const fmtClock = d => d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+    const fmtClockZ = d => `${String(d.getUTCHours()).padStart(2,'0')}:${String(d.getUTCMinutes()).padStart(2,'0')}Z`;
+    const num = n => n.toLocaleString();
+
+    function fmtDuration(seconds) {
+      if (!seconds || seconds < 0) return '0m';
+      const h = Math.floor(seconds / 3600);
+      const m = Math.floor((seconds % 3600) / 60);
+      return h > 0 ? `${h}h ${m}m` : `${m}m`;
+    }
+
+    function el(tag, className, text) {
+      const node = document.createElement(tag);
+      if (className) node.className = className;
+      if (text !== undefined) node.textContent = text;
+      return node;
+    }
+
+    function renderHero(stats) {
+      const t = stats.totals;
+      const created = stats.status === 'instance_created';
+      document.body.className = created ? 'state-created' : 'state-hunting';
+
+      document.getElementById('s-status').textContent = created ? '[ INSTANCE_CREATED ]' : '[ HUNTING ]';
+      document.getElementById('s-status').className = created ? 'hot' : 'hot';
+
+      document.getElementById('s-uptime').textContent = fmtDuration(stats.hunting_duration_seconds);
+      document.getElementById('s-attempts').textContent = num(t.attempts);
+
+      const perHour = stats.hunting_duration_seconds > 0
+        ? Math.round(t.attempts / (stats.hunting_duration_seconds / 3600)) : 0;
+      document.getElementById('s-rate').textContent = `${perHour}`;
+
+      const last = parseUTC(stats.last_attempt);
+      document.getElementById('s-last').textContent = last ? `${fmtClockZ(last)}  (${fmtDate(last)})` : '--';
+      document.getElementById('s-down').textContent = fmtDuration(t.downtime_seconds);
+
+      const days = Math.max(1, Math.ceil(stats.hunting_duration_seconds / 86400));
+      document.getElementById('hl-main').textContent = created ? '[ CAPACITY_OK ]' : '[ HUNTING ]';
+      document.getElementById('hl-sub').textContent = `day ${days} of the watch`;
+
+      document.getElementById('blurb').innerHTML = created
+        ? 'An instance was provisioned. Check the <b>INSTANCE_CREATED</b> marker on the host for its public IP, then SSH in with your private key.'
+        : `No free ARM capacity in <b>eu-stockholm-1</b> yet. The watch retries on a 60-second cadence and stops the moment Oracle opens a slot.`;
+
+      const gen = parseUTC(stats.generated_at);
+      document.getElementById('updated').textContent = gen ? fmtClockZ(gen) : '--:--Z';
+      document.getElementById('uplink-state').textContent = created ? 'idle' : 'live';
+    }
+
+    function renderChart(stats) {
+      const buckets = stats.timeline || [];
+      const chart = document.getElementById('chart');
+      if (!buckets.length) { chart.textContent = '  (no signals)'; return; }
+
+      const byKey = new Map();
+      let peak = 0;
+      for (const b of buckets) {
+        byKey.set(b.hour, b.attempts);
+        if (b.attempts > peak) peak = b.attempts;
+      }
+
+      const dayKeys = Array.from(new Set(buckets.map(b => b.hour.slice(0, 10)))).sort();
+      const days = dayKeys.slice(-7);
+
+      const gapWindows = (stats.gaps || [])
+        .map(g => [parseUTC(g.from), parseUTC(g.to)])
+        .filter(([a, b]) => a && b);
+
+      const now = parseUTC(stats.generated_at) || new Date();
+
+      // build 24 char rows: one ramp char per hour, red marker for gaps, dim for future
+      for (const dayKey of days) {
+        const dayDate = parseUTC(dayKey + 'T00:00:00');
+        const row = el('div', 'row');
+        row.appendChild(el('div', 'row-label', fmtDate(dayDate)));
+        const bars = el('div', 'row-bars');
+        const html = [];
+        for (let h = 0; h < 24; h++) {
+          const hourKey = `${dayKey}T${h.toString().padStart(2, '0')}:00`;
+          const hourStart = parseUTC(hourKey);
+          const hourEnd = new Date(hourStart.getTime() + 3600 * 1000);
+          if (hourStart > now) { html.push('<span class="future">·</span>'); continue; }
+          const inGap = gapWindows.some(([a, b]) => a < hourEnd && b > hourStart);
+          const attempts = byKey.get(hourKey) ?? 0;
+          if (inGap && attempts < 5) { html.push('<span class="gap">▤</span>'); continue; }
+          const idx = peak > 0 ? Math.min(8, Math.round((attempts / peak) * 8)) : 0;
+          html.push(RAMP[idx] === ' ' ? '_' : RAMP[idx]);
+        }
+        bars.innerHTML = html.join('');
+        row.appendChild(bars);
+        chart.appendChild(row);
+      }
+
+      const axis = el('div', 'x-axis');
+      axis.innerHTML = '<span>00h</span><span>06h</span><span>12h</span><span>18h</span><span style="flex:none">23h</span>';
+      chart.appendChild(axis);
+    }
+
+    function renderTally(stats) {
+      const t = stats.totals;
+      const rej = document.getElementById('tbl-rej');
+      function row(code, lbl, v, cls) {
+        const tr = document.createElement('tr');
+        if (code) tr.appendChild(el('td', cls ? `code ${cls}` : 'code', code));
+        else tr.appendChild(el('td', 'code', ''));
+        tr.appendChild(el('td', 'lbl', lbl));
+        tr.appendChild(el('td', 'val', v));
+        return tr;
+      }
+      rej.appendChild(row('429', 'rate-limited', num(t.rate_limited_429)));
+      rej.appendChild(row('500', 'out of capacity', num(t.out_of_capacity_500), 'c500'));
+      if (t.other > 0) rej.appendChild(row('---', 'other', num(t.other)));
+
+      const intr = document.getElementById('tbl-intr');
+      function row2(lbl, v) {
+        const tr = document.createElement('tr');
+        tr.appendChild(el('td', 'lbl', lbl));
+        tr.appendChild(el('td', 'val', v));
+        return tr;
+      }
+      intr.appendChild(row2('offline gaps', num(t.gaps)));
+      intr.appendChild(row2('total downtime', fmtDuration(t.downtime_seconds)));
+      intr.appendChild(row2('connection resets', num(t.crashes)));
+    }
+
+    const LOG_RE = /^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2})\s+(\d+)\s*(.*)$/;
+
+    function renderLog(stats) {
+      const ul = document.getElementById('log-tail');
+      if (!stats.log_tail.length) {
+        const li = document.createElement('li');
+        li.textContent = '  no signals logged.';
+        ul.appendChild(li);
+        return;
+      }
+      for (const line of stats.log_tail.slice().reverse()) {
+        const li = document.createElement('li');
+        const m = LOG_RE.exec(line);
+        if (!m) {
+          li.appendChild(el('span', 'ts', ''));
+          li.appendChild(el('span', 'code', ''));
+          li.appendChild(el('span', 'msg', line));
+          ul.appendChild(li);
+          continue;
+        }
+        const [, , clock, status, message] = m;
+        li.appendChild(el('span', 'ts', clock + 'Z'));
+        li.appendChild(el('span', status === '500' ? 'code c500' : 'code', `[${status}]`));
+        li.appendChild(el('span', 'msg', message || '--'));
+        ul.appendChild(li);
+      }
+    }
+
+    function renderGaps(stats) {
+      const ul = document.getElementById('gaps');
+      if (!stats.gaps.length) {
+        const li = document.createElement('li');
+        li.style.gridTemplateColumns = '1fr';
+        li.appendChild(el('span', 'rt', '  none — watch held steady.'));
+        ul.appendChild(li);
+        return;
+      }
+      for (const g of stats.gaps.slice().reverse()) {
+        const from = parseUTC(g.from);
+        const to = parseUTC(g.to);
+        const li = document.createElement('li');
+        li.appendChild(el('span', 'ts', from ? `${fmtDate(from)} ${fmtClockZ(from)}` : g.from));
+        li.appendChild(el('span', 'arr', '──>'));
+        const sameDay = from && to && from.toDateString() === to.toDateString();
+        li.appendChild(el('span', 'rt', to ? (sameDay ? fmtClockZ(to) : `${fmtDate(to)} ${fmtClockZ(to)}`) : g.to));
+        li.appendChild(el('span', 'dur', fmtDuration(g.duration_seconds)));
+        ul.appendChild(li);
+      }
+    }
+
+    async function main() {
+      try {
+        const res = await fetch(STATS_URL, { cache: 'no-store' });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const stats = await res.json();
+        renderHero(stats);
+        renderChart(stats);
+        renderTally(stats);
+        renderLog(stats);
+        renderGaps(stats);
+      } catch (err) {
+        console.error(err);
+        document.body.className = 'state-error';
+        document.getElementById('s-status').textContent = '[ SIGNAL_LOST ]';
+        document.getElementById('hl-main').textContent = '[ ERR_NO_FEED ]';
+        document.getElementById('hl-sub').textContent = 'stats.json unreachable';
+        document.getElementById('blurb').textContent =
+          'Could not read stats.json. Re-run or check the publisher.';
+      }
+    }
+    main();
+  </script>
+</body>
+</html>
