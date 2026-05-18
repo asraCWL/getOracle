@@ -2,95 +2,141 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta http-equiv="refresh" content="180">
   <title>getOracle — capacity watch</title>
   <meta name="description" content="A live watch for Oracle Free Tier ARM capacity (VM.Standard.A1.Flex) in eu-stockholm-1.">
-  <meta name="theme-color" content="#07090c">
+  <meta name="theme-color" content="#08090d">
   <meta property="og:title" content="getOracle — capacity watch">
   <meta property="og:description" content="Listening for Oracle Free Tier ARM capacity in eu-stockholm-1.">
   <meta property="og:type" content="website">
   <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Ccircle%20cx='16'%20cy='16'%20r='11'%20fill='none'%20stroke='%23f0a23c'%20stroke-width='2.5'/%3E%3Ccircle%20cx='16'%20cy='16'%20r='4'%20fill='%23f0a23c'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body class="state-hunting">
-  <div class="bg-grid" aria-hidden="true"></div>
-  <div class="bg-grain" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
 
-  <div class="frame">
+  <main>
     <header class="masthead">
-      <span class="wordmark">getOracle</span>
-      <div class="masthead-meta">
-        <span class="coords">eu-stockholm-1 · VM.Standard.A1.Flex</span>
-        <span class="updated" id="updated">—</span>
+      <div class="mark">
+        <svg viewBox="0 0 32 32" aria-hidden="true">
+          <circle cx="16" cy="16" r="12" fill="none" stroke="var(--signal)" stroke-width="2"/>
+          <circle cx="16" cy="16" r="4"  fill="var(--signal)"/>
+        </svg>
+        <span class="name">getOracle</span>
+        <span class="vol" id="vol">Vol. —</span>
+      </div>
+      <div class="meta">
+        <span>eu-stockholm-1 · A1.Flex</span>
+        <span class="dot" aria-hidden="true"></span>
+        <span id="updated">—</span>
       </div>
     </header>
 
-    <section class="hero" id="hero">
-      <div class="hero-state">
-        <span class="dot" id="dot" aria-hidden="true"></span>
-        <h1 class="state-word" id="state-word">opening channel…</h1>
-      </div>
-      <p class="hero-sub" id="hero-sub">Connecting to the watch log.</p>
-
-      <div class="hero-metrics">
-        <div class="metric">
-          <div class="metric-value" id="m-attempts">—</div>
-          <div class="metric-label">attempts logged</div>
-        </div>
-        <div class="metric-sep" aria-hidden="true"></div>
-        <div class="metric">
-          <div class="metric-value" id="m-watch">—</div>
-          <div class="metric-label">time on watch</div>
-        </div>
+    <section class="hero">
+      <div class="eyebrow">
+        <span class="pip" aria-hidden="true"></span>
+        <span>The watch is</span>
+        <span class="now" id="eyebrow-state">listening…</span>
       </div>
 
-      <p class="hero-readout" id="hero-readout">—</p>
+      <h1 class="hero-title">
+        <span id="hero-day">Day —</span>
+        <br>
+        <span class="accent">of the watch.</span>
+      </h1>
+
+      <p class="hero-lede" id="hero-lede">
+        Reading the signal log…
+      </p>
+
+      <p class="last-sig"><span class="ping" aria-hidden="true"></span>last signal <b id="last-rel">—</b></p>
+
+      <dl class="stats-row">
+        <div class="stat">
+          <dt>Signals sent</dt>
+          <dd id="stat-attempts">—</dd>
+        </div>
+        <div class="stat">
+          <dt>On duty</dt>
+          <dd id="stat-watch">—</dd>
+        </div>
+        <div class="stat">
+          <dt>Avg / hour</dt>
+          <dd id="stat-rate">—</dd>
+        </div>
+        <div class="stat">
+          <dt>Uptime</dt>
+          <dd id="stat-uptime">—</dd>
+        </div>
+      </dl>
     </section>
 
-    <section class="panel chart-panel">
-      <div class="panel-head">
-        <h2>Signal log</h2>
-        <span class="panel-note" id="chart-note">—</span>
+    <section class="block">
+      <div class="section-head">
+        <h2><span class="num">I</span>Signal</h2>
+        <span class="section-note" id="heatmap-note">—</span>
       </div>
-      <div class="chart">
-        <div class="chart-yaxis" id="chart-yaxis"></div>
-        <div class="chart-main">
-          <div class="chart-plot">
-            <div class="chart-grid" id="chart-grid"></div>
-            <div class="chart-gaps" id="chart-gaps"></div>
-            <div class="timeline" id="timeline"></div>
-            <div class="now-marker" id="now-marker"><span>now</span></div>
-          </div>
-          <div class="chart-xaxis" id="chart-xaxis"></div>
+      <div class="heatmap-wrap">
+        <div class="heatmap" id="heatmap" role="img" aria-label="Hourly attempt heatmap"></div>
+        <div class="heatmap-legend">
+          <span>quiet</span>
+          <span class="swatches">
+            <span class="sw"></span>
+            <span class="sw l1"></span>
+            <span class="sw l2"></span>
+            <span class="sw l3"></span>
+            <span class="sw l4"></span>
+          </span>
+          <span>active</span>
+          <span class="gap-key">
+            <span class="sw"></span>
+            <span>offline gap</span>
+          </span>
         </div>
       </div>
     </section>
 
-    <div class="panel-row">
-      <section class="panel">
-        <div class="panel-head"><h2>Rejections</h2></div>
-        <ul class="statlist" id="rejections"></ul>
-      </section>
-      <section class="panel">
-        <div class="panel-head"><h2>Interruptions</h2></div>
-        <ul class="statlist" id="interruptions"></ul>
-      </section>
+    <section class="block">
+      <div class="grid-two">
+        <article class="panel">
+          <div class="panel-head"><h3>Rejections</h3><span class="kicker">why we wait</span></div>
+          <ul class="kv" id="rejections"></ul>
+        </article>
+        <article class="panel">
+          <div class="panel-head"><h3>Interruptions</h3><span class="kicker">when we slept</span></div>
+          <ul class="kv" id="interruptions"></ul>
+        </article>
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="section-head">
+        <h2><span class="num">II</span>Recent signals</h2>
+        <span class="section-note">latest first</span>
+      </div>
+      <div class="panel">
+        <ul class="log" id="log-tail"></ul>
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="section-head">
+        <h2><span class="num">III</span>Offline gaps</h2>
+      </div>
+      <div class="panel">
+        <ul class="gaps" id="gaps"></ul>
+      </div>
+    </section>
+
+    <div class="colophon">
+      <span>refreshes every 3m</span>
+      <em>“and so the watch resumes.”</em>
     </div>
-
-    <section class="panel">
-      <div class="panel-head"><h2>Recent signals</h2></div>
-      <ul class="loglist" id="log-tail"></ul>
-    </section>
-
-    <section class="panel">
-      <div class="panel-head"><h2>Offline gaps</h2></div>
-      <ul class="gaplist" id="gaps"></ul>
-    </section>
-  </div>
+  </main>
 
   <script src="app.js"></script>
 </body>
