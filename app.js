@@ -27,10 +27,13 @@ function fmtDuration(seconds) {
   return h > 0 ? `${h}h ${m}m` : `${m}m`;
 }
 
-// Parse a "YYYY-MM-DDTHH:MM[:SS]" or "YYYY-MM-DD HH:MM:SS" stamp as local time.
-function parseLocal(s) {
+// Parse a "YYYY-MM-DDTHH:MM[:SS]" or "YYYY-MM-DD HH:MM:SS" stamp as UTC.
+// The publisher (VM, UTC) emits naive stamps; we treat them as UTC so the
+// browser renders them in the viewer's local clock via toLocale*.
+function parseUTC(s) {
   if (!s) return null;
-  const d = new Date(s.replace(" ", "T"));
+  const stamp = s.replace(" ", "T");
+  const d = new Date(/[zZ]|[+-]\d{2}:?\d{2}$/.test(stamp) ? stamp : stamp + "Z");
   return isNaN(d) ? null : d;
 }
 
@@ -109,8 +112,8 @@ function renderHero(stats) {
     ? Math.round(t.attempts / (stats.hunting_duration_seconds / 3600))
     : 0;
 
-  lastAttemptDate = parseLocal(stats.last_attempt);
-  const firstDate = parseLocal(stats.first_attempt);
+  lastAttemptDate = parseUTC(stats.last_attempt);
+  const firstDate = parseUTC(stats.first_attempt);
 
   const readout = document.getElementById("hero-readout");
   readout.textContent = "";
@@ -163,11 +166,11 @@ function renderChart(stats) {
 
   // Offline-gap windows, used to shade the hours they overlap.
   const gapWindows = (stats.gaps || [])
-    .map((g) => [parseLocal(g.from), parseLocal(g.to)])
+    .map((g) => [parseUTC(g.from), parseUTC(g.to)])
     .filter(([a, b]) => a && b);
 
   buckets.forEach((bucket, i) => {
-    const start = parseLocal(bucket.hour);
+    const start = parseUTC(bucket.hour);
     const end = start ? new Date(start.getTime() + 3600 * 1000) : null;
     const inGap = start && gapWindows.some(([a, b]) => a < end && b > start);
 
@@ -188,7 +191,7 @@ function renderChart(stats) {
     const cell = el("div", "xcell");
     const isMidnight = bucket.hour.slice(11, 13) === "00";
     if (isMidnight || i === 0) {
-      const date = parseLocal(bucket.hour);
+      const date = parseUTC(bucket.hour);
       cell.appendChild(el("span", "xlabel day", date ? fmtDate(date) : bucket.hour));
     } else if (i % stride === 0) {
       cell.appendChild(el("span", "xlabel", bucket.hour.slice(11, 16)));
@@ -262,8 +265,8 @@ function renderGaps(stats) {
     return;
   }
   for (const gap of stats.gaps.slice().reverse()) {
-    const from = parseLocal(gap.from);
-    const to = parseLocal(gap.to);
+    const from = parseUTC(gap.from);
+    const to = parseUTC(gap.to);
     const li = document.createElement("li");
     li.appendChild(el("span", "log-ts", from ? fmtStamp(from) : gap.from));
     li.appendChild(el("span", "gap-arrow", "→"));
@@ -294,7 +297,7 @@ async function main() {
     renderGaps(stats);
 
     document.getElementById("updated").textContent =
-      `updated ${fmtStamp(parseLocal(stats.generated_at))} · refreshes every 3m`;
+      `updated ${fmtStamp(parseUTC(stats.generated_at))} · refreshes every 3m`;
 
     setInterval(tickRel, 1000);
   } catch (err) {
