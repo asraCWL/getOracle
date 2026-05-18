@@ -1,19 +1,19 @@
 {
-  "generated_at": "2026-05-18T06:47:40",
+  "generated_at": "2026-05-18T17:49:27",
   "status": "hunting",
   "instance_created": false,
   "vpu_bumped": false,
   "first_attempt": "2026-05-13T20:59:11",
-  "last_attempt": "2026-05-18T06:46:47",
-  "hunting_duration_seconds": 335311,
+  "last_attempt": "2026-05-18T17:48:27",
+  "hunting_duration_seconds": 335736,
   "totals": {
-    "attempts": 5520,
-    "rate_limited_429": 2728,
-    "out_of_capacity_500": 2792,
+    "attempts": 5532,
+    "rate_limited_429": 2731,
+    "out_of_capacity_500": 2801,
     "other": 0,
-    "crashes": 44,
-    "gaps": 22,
-    "downtime_seconds": 45545
+    "crashes": 60,
+    "gaps": 27,
+    "downtime_seconds": 84820
   },
   "timeline": [
     {
@@ -442,7 +442,51 @@
     },
     {
       "hour": "2026-05-18T06:00",
-      "attempts": 47
+      "attempts": 54
+    },
+    {
+      "hour": "2026-05-18T07:00",
+      "attempts": 0
+    },
+    {
+      "hour": "2026-05-18T08:00",
+      "attempts": 0
+    },
+    {
+      "hour": "2026-05-18T09:00",
+      "attempts": 0
+    },
+    {
+      "hour": "2026-05-18T10:00",
+      "attempts": 0
+    },
+    {
+      "hour": "2026-05-18T11:00",
+      "attempts": 1
+    },
+    {
+      "hour": "2026-05-18T12:00",
+      "attempts": 0
+    },
+    {
+      "hour": "2026-05-18T13:00",
+      "attempts": 1
+    },
+    {
+      "hour": "2026-05-18T14:00",
+      "attempts": 1
+    },
+    {
+      "hour": "2026-05-18T15:00",
+      "attempts": 0
+    },
+    {
+      "hour": "2026-05-18T16:00",
+      "attempts": 1
+    },
+    {
+      "hour": "2026-05-18T17:00",
+      "attempts": 1
     }
   ],
   "gaps": [
@@ -555,21 +599,34 @@
       "from": "2026-05-17T18:47:54",
       "to": "2026-05-17T19:01:25",
       "duration_seconds": 811
+    },
+    {
+      "from": "2026-05-18T06:53:52",
+      "to": "2026-05-18T11:27:26",
+      "duration_seconds": 16414
+    },
+    {
+      "from": "2026-05-18T11:27:26",
+      "to": "2026-05-18T13:16:39",
+      "duration_seconds": 6553
+    },
+    {
+      "from": "2026-05-18T13:16:39",
+      "to": "2026-05-18T14:47:19",
+      "duration_seconds": 5440
+    },
+    {
+      "from": "2026-05-18T14:47:19",
+      "to": "2026-05-18T16:12:12",
+      "duration_seconds": 5093
+    },
+    {
+      "from": "2026-05-18T16:12:12",
+      "to": "2026-05-18T17:48:27",
+      "duration_seconds": 5775
     }
   ],
   "log_tail": [
-    "2026-05-18 06:27:33  500  Out of host capacity.",
-    "2026-05-18 06:28:34  429  Too many requests for the user",
-    "2026-05-18 06:29:35  500  Out of host capacity.",
-    "2026-05-18 06:30:35  429  Too many requests for the user",
-    "2026-05-18 06:31:36  500  Out of host capacity.",
-    "2026-05-18 06:32:36  429  Too many requests for the user",
-    "2026-05-18 06:33:37  500  Out of host capacity.",
-    "2026-05-18 06:34:38  429  Too many requests for the user",
-    "2026-05-18 06:35:39  500  Out of host capacity.",
-    "2026-05-18 06:36:39  429  Too many requests for the user",
-    "2026-05-18 06:37:40  500  Out of host capacity.",
-    "2026-05-18 06:38:41  429  Too many requests for the user",
     "2026-05-18 06:39:42  500  Out of host capacity.",
     "2026-05-18 06:40:42  429  Too many requests for the user",
     "2026-05-18 06:41:43  500  Out of host capacity.",
@@ -577,6 +634,18 @@
     "2026-05-18 06:43:45  500  Out of host capacity.",
     "2026-05-18 06:44:45  429  Too many requests for the user",
     "2026-05-18 06:45:46  500  Out of host capacity.",
-    "2026-05-18 06:46:47  429  Too many requests for the user"
+    "2026-05-18 06:46:47  429  Too many requests for the user",
+    "2026-05-18 06:47:48  500  Out of host capacity.",
+    "2026-05-18 06:48:48  429  Too many requests for the user",
+    "2026-05-18 06:49:49  500  Out of host capacity.",
+    "2026-05-18 06:50:49  429  Too many requests for the user",
+    "2026-05-18 06:51:50  500  Out of host capacity.",
+    "2026-05-18 06:52:51  429  Too many requests for the user",
+    "2026-05-18 06:53:52  500  Out of host capacity.",
+    "2026-05-18 11:27:26  500  Out of host capacity.",
+    "2026-05-18 13:16:39  500  Out of host capacity.",
+    "2026-05-18 14:47:19  500  Out of host capacity.",
+    "2026-05-18 16:12:12  500  Out of host capacity.",
+    "2026-05-18 17:48:27  500  Out of host capacity."
   ]
 }
