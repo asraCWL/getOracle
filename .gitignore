@@ -21,6 +21,7 @@ dashboard/stats.json
 
 # macOS
 .DS_Store
+.Amphetamine.DriveAlive
 
 # Editor
 .vscode/
