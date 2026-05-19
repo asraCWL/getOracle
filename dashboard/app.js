@@ -75,7 +75,18 @@ function renderHero(stats) {
   const dayWord = document.getElementById('hero-day');
   const lede    = document.getElementById('hero-lede');
 
-  const watchDays = Math.max(1, Math.ceil(stats.hunting_duration_seconds / 86400));
+  // Inclusive calendar-day count from first_attempt → today in the viewer's
+  // local timezone. Partial-run days still count as a full day; this matches
+  // the "we're on day N" mental model rather than active-hunting-time/86400
+  // (which would drop a day every time downtime trims the running total).
+  const watchDays = (() => {
+    const first = parseUTC(stats.first_attempt);
+    if (!first) return 1;
+    const startLocal = new Date(first.getFullYear(), first.getMonth(), first.getDate());
+    const now = new Date();
+    const todayLocal = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    return Math.max(1, Math.floor((todayLocal - startLocal) / 86400000) + 1);
+  })();
 
   if (created) {
     eyebrow.textContent = 'over.';
