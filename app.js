@@ -141,64 +141,71 @@ function renderHeatmap(stats) {
     return;
   }
 
-  // index buckets by ISO date string and hour
-  const byKey = new Map();
+  // Re-bin upstream UTC hourly buckets into the viewer's local timezone so
+  // the row dates, column hour labels and "now" cell all match the wall
+  // clock. At integer offsets (e.g. CEST = UTC+2) each UTC hour maps 1:1
+  // to a local hour; at fractional offsets (IST = UTC+5:30) we'd want
+  // sub-hour resampling, but no realistic viewer hits that here.
+  const dayKeyOf = d =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+  const byLocalDay = new Map();   // "YYYY-MM-DD" (local) → 24-slot array
   let peak = 0;
   for (const b of buckets) {
-    byKey.set(b.hour, b.attempts);
-    if (b.attempts > peak) peak = b.attempts;
+    const utc = parseUTC(b.hour);
+    if (!utc) continue;
+    const dk = dayKeyOf(utc);
+    const lh = utc.getHours();
+    if (!byLocalDay.has(dk)) byLocalDay.set(dk, new Array(24).fill(null));
+    const row = byLocalDay.get(dk);
+    row[lh] = (row[lh] || 0) + b.attempts;
+    if (row[lh] > peak) peak = row[lh];
   }
 
-  // collect the unique day list, sorted oldest → newest
-  const dayKeys = Array.from(new Set(buckets.map(b => b.hour.slice(0, 10)))).sort();
-  // limit to the last 7 days for visual density
+  const dayKeys = Array.from(byLocalDay.keys()).sort();
   const days = dayKeys.slice(-7);
 
-  // gap windows for shading
   const gapWindows = (stats.gaps || [])
     .map(g => [parseUTC(g.from), parseUTC(g.to)])
     .filter(([a, b]) => a && b);
 
-  // current hour boundary
   const now = parseUTC(stats.generated_at) || new Date();
 
-  // header row: blank corner + 0..23
+  // header row: blank corner + 0..23 (local hours)
   grid.appendChild(el('div', 'hm-hdr day', ''));
   for (let h = 0; h < 24; h++) {
     const hdr = el('div', `hm-hdr h-${h}`, h.toString().padStart(2, '0'));
     grid.appendChild(hdr);
   }
 
-  // one row per day
+  // one row per local day
   for (const dayKey of days) {
-    const dayDate = parseUTC(dayKey + 'T00:00:00');
+    const [y, m, d] = dayKey.split('-').map(Number);
+    const dayDate = new Date(y, m - 1, d);
     const label = el('div', 'hm-row-label');
     label.appendChild(document.createTextNode(fmtDate(dayDate)));
     const dow = el('span', 'dow', fmtDow(dayDate));
     label.appendChild(dow);
     grid.appendChild(label);
 
+    const hours = byLocalDay.get(dayKey) || new Array(24).fill(null);
     for (let h = 0; h < 24; h++) {
-      const hourKey = `${dayKey}T${h.toString().padStart(2, '0')}:00`;
-      const attempts = byKey.has(hourKey) ? byKey.get(hourKey) : null;
-      const hourStart = parseUTC(hourKey);
-      const hourEnd = new Date(hourStart.getTime() + 3600 * 1000);
+      const attempts = hours[h];
+      const hourStart = new Date(y, m - 1, d, h);
+      const hourEnd = new Date(y, m - 1, d, h + 1);
 
       const cell = el('div', 'hm-cell');
 
-      // future hour
       if (hourStart > now) {
         cell.classList.add('future');
         grid.appendChild(cell);
         continue;
       }
 
-      // gap overlap
       const inGap = gapWindows.some(([a, b]) => a < hourEnd && b > hourStart);
       if (inGap && (attempts == null || attempts < 5)) {
         cell.classList.add('gap');
       } else if (attempts != null) {
-        // quantize to 4 levels relative to peak
         const ratio = peak > 0 ? attempts / peak : 0;
         let lvl = 0;
         if (ratio > 0.0)  lvl = 1;
@@ -208,11 +215,10 @@ function renderHeatmap(stats) {
         if (lvl > 0) cell.classList.add(`lvl-${lvl}`);
       }
 
-      // mark current hour
       if (now >= hourStart && now < hourEnd) cell.classList.add('now');
 
       const dispAttempts = attempts != null ? attempts : 0;
-      cell.dataset.label = `${fmtDate(hourStart)} · ${h.toString().padStart(2, '0')}:00 — ${dispAttempts}${inGap ? ' (offline)' : ''}`;
+      cell.dataset.label = `${fmtDate(hourStart)} · ${String(h).padStart(2, '0')}:00 — ${dispAttempts}${inGap ? ' (offline)' : ''}`;
       grid.appendChild(cell);
     }
   }
