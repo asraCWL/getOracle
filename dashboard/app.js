@@ -266,11 +266,13 @@ function renderLog(stats) {
       container.appendChild(li);
       continue;
     }
-    const [, , clock, status, message] = m;
+    const [, date, clock, status, message] = m;
+    // log line clocks are UTC from the VM publisher — render in the viewer's locale
+    const local = parseUTC(`${date}T${clock}`);
     const cls = status === '429' ? 'chip chip-429'
               : status === '500' ? 'chip chip-500'
               : 'chip chip-other';
-    li.appendChild(el('span', 'ts', clock));
+    li.appendChild(el('span', 'ts', local ? fmtClock(local) : clock));
     li.appendChild(el('span', cls, status));
     li.appendChild(el('span', 'msg', message || '—'));
     container.appendChild(li);
