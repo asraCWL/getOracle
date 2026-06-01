@@ -1,15 +1,15 @@
 {
-  "generated_at": "2026-06-01T14:41:59",
+  "generated_at": "2026-06-01T14:52:07",
   "status": "hunting",
   "instance_created": false,
   "vpu_bumped": false,
   "first_attempt": "2026-05-13T18:59:11",
-  "last_attempt": "2026-06-01T14:41:00",
-  "hunting_duration_seconds": 1539806,
+  "last_attempt": "2026-06-01T14:52:05",
+  "hunting_duration_seconds": 1540471,
   "totals": {
-    "attempts": 25441,
-    "rate_limited_429": 12666,
-    "out_of_capacity_500": 12775,
+    "attempts": 25452,
+    "rate_limited_429": 12671,
+    "out_of_capacity_500": 12781,
     "other": 0,
     "crashes": 0,
     "gaps": 28,
@@ -1826,7 +1826,7 @@
     },
     {
       "hour": "2026-06-01T14:00",
-      "attempts": 41
+      "attempts": 52
     }
   ],
   "gaps": [
@@ -1972,17 +1972,6 @@
     }
   ],
   "log_tail": [
-    "2026-06-01 14:21:51  500  Out of host capacity.",
-    "2026-06-01 14:22:51  429  Too many requests for the user",
-    "2026-06-01 14:23:52  500  Out of host capacity.",
-    "2026-06-01 14:24:52  429  Too many requests for the user",
-    "2026-06-01 14:25:53  500  Out of host capacity.",
-    "2026-06-01 14:26:53  429  Too many requests for the user",
-    "2026-06-01 14:27:54  500  Out of host capacity.",
-    "2026-06-01 14:28:54  429  Too many requests for the user",
-    "2026-06-01 14:29:55  500  Out of host capacity.",
-    "2026-06-01 14:30:55  429  Too many requests for the user",
-    "2026-06-01 14:31:56  500  Out of host capacity.",
     "2026-06-01 14:32:56  429  Too many requests for the user",
     "2026-06-01 14:33:57  500  Out of host capacity.",
     "2026-06-01 14:34:57  429  Too many requests for the user",
@@ -1991,6 +1980,17 @@
     "2026-06-01 14:37:59  500  Out of host capacity.",
     "2026-06-01 14:38:59  429  Too many requests for the user",
     "2026-06-01 14:39:59  500  Out of host capacity.",
-    "2026-06-01 14:41:00  429  Too many requests for the user"
+    "2026-06-01 14:41:00  429  Too many requests for the user",
+    "2026-06-01 14:42:00  500  Out of host capacity.",
+    "2026-06-01 14:43:01  429  Too many requests for the user",
+    "2026-06-01 14:44:01  500  Out of host capacity.",
+    "2026-06-01 14:45:02  429  Too many requests for the user",
+    "2026-06-01 14:46:03  500  Out of host capacity.",
+    "2026-06-01 14:47:03  429  Too many requests for the user",
+    "2026-06-01 14:48:03  500  Out of host capacity.",
+    "2026-06-01 14:49:04  429  Too many requests for the user",
+    "2026-06-01 14:50:04  500  Out of host capacity.",
+    "2026-06-01 14:51:04  429  Too many requests for the user",
+    "2026-06-01 14:52:05  500  Out of host capacity."
   ]
 }
