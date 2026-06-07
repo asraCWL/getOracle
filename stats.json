@@ -1,14 +1,14 @@
 {
-  "generated_at": "2026-06-07T11:32:12",
+  "generated_at": "2026-06-07T11:42:36",
   "status": "hunting",
   "instance_created": false,
   "vpu_bumped": false,
   "first_attempt": "2026-05-13T18:59:11",
-  "last_attempt": "2026-06-07T11:31:10",
-  "hunting_duration_seconds": 2046816,
+  "last_attempt": "2026-06-07T11:42:00",
+  "hunting_duration_seconds": 2047466,
   "totals": {
-    "attempts": 33112,
-    "rate_limited_429": 16455,
+    "attempts": 33117,
+    "rate_limited_429": 16460,
     "out_of_capacity_500": 16657,
     "other": 0,
     "crashes": 0,
@@ -2390,7 +2390,7 @@
     },
     {
       "hour": "2026-06-07T11:00",
-      "attempts": 15
+      "attempts": 20
     }
   ],
   "gaps": [
@@ -2536,11 +2536,6 @@
     }
   ],
   "log_tail": [
-    "2026-06-07 10:49:59  429  Too many requests for the user",
-    "2026-06-07 10:52:09  429  Too many requests for the user",
-    "2026-06-07 10:54:19  429  Too many requests for the user",
-    "2026-06-07 10:56:29  429  Too many requests for the user",
-    "2026-06-07 10:58:40  429  Too many requests for the user",
     "2026-06-07 11:00:50  429  Too many requests for the user",
     "2026-06-07 11:02:59  429  Too many requests for the user",
     "2026-06-07 11:05:09  429  Too many requests for the user",
@@ -2555,6 +2550,11 @@
     "2026-06-07 11:24:40  429  Too many requests for the user",
     "2026-06-07 11:26:50  429  Too many requests for the user",
     "2026-06-07 11:29:00  429  Too many requests for the user",
-    "2026-06-07 11:31:10  429  Too many requests for the user"
+    "2026-06-07 11:31:10  429  Too many requests for the user",
+    "2026-06-07 11:33:20  429  Too many requests for the user",
+    "2026-06-07 11:35:30  429  Too many requests for the user",
+    "2026-06-07 11:37:40  429  Too many requests for the user",
+    "2026-06-07 11:39:50  429  Too many requests for the user",
+    "2026-06-07 11:42:00  429  Too many requests for the user"
   ]
 }
