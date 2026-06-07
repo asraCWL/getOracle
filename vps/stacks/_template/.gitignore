@@ -1,0 +1,6 @@
+# Per-app secrets and runtime artifacts — never commit these.
+.env
+data/
+*.log
+__pycache__/
+*.pyc

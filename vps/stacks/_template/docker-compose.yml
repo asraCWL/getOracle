@@ -1,0 +1,24 @@
+# One app = one folder under /opt/stacks/. This is the long-running SERVICE pattern
+# (something that should stay up 24/7 and restart if it crashes).
+#
+# For a SCHEDULED job (run on a timer, then exit) see /opt/stacks/README.md —
+# you keep this compose file but trigger it with `docker compose run --rm` from a
+# systemd timer instead of `up -d`.
+
+services:
+  app:
+    build: .
+    # ...or skip `build:` and use a prebuilt image:
+    # image: ghcr.io/asraCWL/<app>:latest
+    env_file: .env                 # secrets + config (gitignored)
+    environment:
+      TZ: Europe/Copenhagen
+    volumes:
+      - ./data:/app/data           # persistent state: sqlite, output files, etc.
+    restart: unless-stopped        # Docker is the supervisor (replaces systemd/launchd)
+
+    # If the app serves a web UI/dashboard, bind it to localhost ONLY and reach it
+    # over an SSH tunnel (ssh -L 8765:localhost:8765 oracle). Nothing on the public
+    # internet. To expose it publicly later, see "Opening public ports" in the handover.
+    # ports:
+    #   - "127.0.0.1:8765:8765"
