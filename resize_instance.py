@@ -17,8 +17,8 @@ INSTANCE_OCID = (
     "ocid1.instance.oc1.eu-stockholm-1."
     "anqxeljrphuxs2qcq3psn2vi56sk7s7poqbffkoxe7bqgq6lr5vehnnuwtra"
 )
-TARGET_OCPUS = 2.0
-TARGET_MEM_GB = 12.0
+TARGET_OCPUS = 4.0
+TARGET_MEM_GB = 24.0
 
 
 def _client():
